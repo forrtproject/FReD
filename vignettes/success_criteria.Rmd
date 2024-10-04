@@ -22,21 +22,22 @@ library(ggplot2)
 
 # Different criteria for replication success
 
-Whether a replication is successful can be assessed in many different ways - that answer different questions.
+Whether a replication is successful can be assessed in many different ways that answer different questions.
 Many criteria have been proposed, and some of them have been implemented in 
 `assess_replication_outcome()` - we will briefly introduce them here, and then compare their results.
 
+
 ## Repeated significance
 
-Potentially the most basic question is whether a replication again yields a statistically significant result.
-This has been used to generate many of the headline findings about replicability, and is easily interpretable.
+Potentially the most basic question is whether a replication again yields a statistically significant result in the same direction as the original finding.
+This has been used to generate many of the previous headline findings about replicability, and is easily interpretable.
 However, there are some limitations:
 
 - It ignores the evidence provided by the original study entirely, and might thus assume that a difference in significance is statistically significant.
-- It does not consider the size of the effect, so that large-scale replications that find tiny effects may be considered successful.
+- It does not consider the size of the effect, so that large-scale replications that find tiny effects may still be considered successful.
 - It does not consider the quality of the replication, so that a replication with a tiny sample size may be reported as a failed replication, while it does not tell us anything about the original effect.
 
-To assess replication success in that way, use `criterion = "significance_r"` in `assess_replication_outcome()`.
+To use this criterion, set `criterion = "significance_r"` in `assess_replication_outcome()`.
 
 ```{r}
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .1, n_r = 1000,
@@ -45,9 +46,9 @@ assess_replication_outcome(es_o = .5, n_o = 50, es_r = .1, n_r = 1000,
 
 ## Aggregated Significance
 
-Another approach is to aggregate the effect sizes from the original and replication studies using a meta-analytic approach and assess whether the combined effect is significantly different from zero. This method considers the evidence from both studies together, offering a more integrated perspective.
+Another approach is to aggregate the effect sizes from the original and replication studies using a meta-analytic approach and assess whether their combined effect is significantly different from zero. This method considers the evidence from both studies together, offering a more integrated perspective.
 
-However, it assumes that the quality of evidence from both studies is comparable - which may not be the case if the original study is likely to have been subject to selective reporting (i.e. publication bias) or other Questionable Research Practices. In that case, the reported effect sizes are likely inflated, so that more trust should be placed in the replication study.
+However, it assumes that the quality of evidence from both studies is comparable - which may not be the case if the original study is likely to have been subject to selective reporting (i.e., publication bias) or other questionable research practices. In that case, the reported effect sizes are likely inflated, so that more trust should be placed in the replication study.
 
 To use this criterion, set `criterion = "significance_agg"` in `assess_replication_outcome()`:
 
@@ -60,10 +61,9 @@ assess_replication_outcome(es_o = .5, n_o = 50, es_r = .1, n_r = 50,
 
 This criterion checks whether the original effect size falls within the confidence interval of the replication effect size. If it does, it suggests that the replication is consistent with the original finding, taking into account the uncertainty of the replication study.
 
-This method is beneficial because it directly compares the two studies, emphasizing whether the original result is plausible given the replication data. However, it makes lower-powered replications more likely to be "successful", even if their point estimate is far from the original effect size. Conversely, it makes large (and thus more precise) replications more likely "fail", even if their point estimate is close to the original effect size.
+This method is beneficial because it directly compares the two studies, emphasizing whether the original result is plausible given the replication data. However, it makes lower-powered replications more likely to be considered "successful", even if their point estimate is far from the original effect size. Conversely, it makes large (and thus more precise) replications more likely to be considered "failed", even if their point estimate is close to the original effect size.
 
-
-To assess this, use `criterion = "consistency_ci"`.
+To use this criterion, set `criterion = "consistency_ci"`.
 
 ```{r}
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .3, n_r = 50,
@@ -78,7 +78,8 @@ Prediction intervals offer another way to assess consistency by checking whether
 
 This method is beneficial because it considers the uncertainty in both the original and replication studies. However, particularly for small replication studies, the prediction interval may be very wide, making it very difficult to reject them through replications.
 
-To use this method, set `criterion = "consistency_pi"`
+To use this criterion, set `criterion = "consistency_pi"`
+
 ```{r}
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .3, n_r = 500,
                            criterion = "consistency_pi")
@@ -88,9 +89,9 @@ assess_replication_outcome(es_o = .5, n_o = 50, es_r = .3, n_r = 500,
 
 This criterion tests whether the effects from the original and replication studies are statistically different from each other, using a heterogeneity test (i.e., a Q-test). This is the most rigorous test for the question whether a replication contradicts an original study (if the original study's claim is taken to encompass its full statistical uncertainty).
 
-However, this test generally has low power, again making replication failures for *small* original studies rather unlikely. Also, note that effect sizes can be homogeneous even if the joint effect is not significant, so that a replication might be considered successful even if the aggregate evidence does not support the existence of an effect.
+However, this test generally has low power, making replication failures for *small* original studies rather unlikely. Also, note that effect sizes can be homogeneous even if the joint effect is not significant, so that a replication might be considered successful even if the aggregate evidence does not support the existence of an effect.
 
-To assess replication success using this approach, use `criterion = "homogeneity"`:
+To use this criterion, set `criterion = "homogeneity"`:
 
 ```{r}
 assess_replication_outcome(es_o = .2, n_o = 100, es_r = 0, n_r = 500,
@@ -101,7 +102,7 @@ assess_replication_outcome(es_o = .2, n_o = 100, es_r = 0, n_r = 500,
 
 This criterion combines the assessment of homogeneity with the significance of the effect sizes. It considers a replication as successful if the effect is not statistically different from the original study and the combined effect is significantly different from zero. This method provides a balanced assessment that considers both consistency and evidence strength - yet still has low power to identify replication failures driven by an exaggeration of the reported effect size in small studies.
 
-To apply this, set `criterion = "homogeneity_significance"`:
+To use this criterion, set `criterion = "homogeneity_significance"`:
 
 ```{r}
 assess_replication_outcome(es_o = .2, n_o = 100, es_r = 0, n_r = 500,
@@ -112,7 +113,7 @@ assess_replication_outcome(es_o = .2, n_o = 100, es_r = 0, n_r = 500,
 
 Derived from Simonsohn (2015), the small telescopes approach tests whether the replication effect size is larger than the effect size that would have given the original study a power of 33%. This criterion is based on the idea that a successful replication should indicate that the original study provided some evidence (rather than being a lucky guess). However, this can label replications with substantial effect sizes as failures if the original study was very small, so it is not an appropriate criterion if the focus is on the truth of claims, rather than the quality of evidence.
 
-To use this method, set `criterion = "small_telescopes"`:
+To use this criterion, set `criterion = "small_telescopes"`:
 
 ```{r}
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .2, n_r = 100,
@@ -121,6 +122,7 @@ assess_replication_outcome(es_o = .5, n_o = 50, es_r = .2, n_r = 100,
 assess_replication_outcome(es_o = .5, n_o = 30, es_r = .2, n_r = 100,
                            criterion = "small_telescopes")
 ```
+
 # Comparing different criteria for replication success
 
 To compare the different criteria, we plot the aggregate outcomes based on the FReD dataset. For this, we ignore studies that have not been coded.
