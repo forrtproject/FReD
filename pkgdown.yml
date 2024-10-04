@@ -1,9 +1,9 @@
 pandoc: 3.1.11
-pkgdown: 2.1.0
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   success_criteria: success_criteria.html
-last_built: 2024-09-18T11:44Z
+last_built: 2024-10-04T15:24Z
 urls:
   reference: http://forrt.org/FReD/reference
   article: http://forrt.org/FReD/articles
