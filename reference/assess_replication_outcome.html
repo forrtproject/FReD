@@ -82,7 +82,9 @@ Options include: "significance_r", "significance_agg", "consistency_ci", "consis
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame with the outcome of the assessment based on the specified criterion, with two columns: <code>outcome</code> and <code>outcome_detailed</code>.</p>
+    <p>A data frame with the outcome of the assessment based on the specified criterion, with three columns:
+<code>outcome</code> (success, failure or 'OS not significant'), <code>outcome_detailed</code> (a specific description of the criterion) and
+<code>outcome_report</code> (usually the same as outcome, but further broken out where there are distinct reasons for failure).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
