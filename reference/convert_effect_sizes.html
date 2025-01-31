@@ -54,7 +54,7 @@ Other test statistics cannot be consistently converted, so are returned as <code
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">convert_effect_sizes</span><span class="op">(</span><span class="va">es_values</span>, <span class="va">es_types</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">convert_effect_sizes</span><span class="op">(</span><span class="va">es_values</span>, <span class="va">es_types</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -67,6 +67,11 @@ Other test statistics cannot be consistently converted, so are returned as <code
 
 <dt id="arg-es-types">es_types<a class="anchor" aria-label="anchor" href="#arg-es-types"></a></dt>
 <dd><p>Character vector of effect size types (types/wordings that are not supported are flagged in warning)</p></dd>
+
+
+<dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
+<dd><p>Logical. Should dataset warnings (unknown effect sizes and values not convertible to numeric)
+and status messages be suppressed?</p></dd>
 
 </dl></div>
     <div class="section level2">
