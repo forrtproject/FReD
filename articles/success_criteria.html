@@ -82,31 +82,32 @@
 <h2 id="different-criteria-for-replication-success">Different criteria for replication success<a class="anchor" aria-label="anchor" href="#different-criteria-for-replication-success"></a>
 </h2>
 <p>Whether a replication is successful can be assessed in many different
-ways - that answer different questions. Many criteria have been
-proposed, and some of them have been implemented in
+ways that answer different questions. Many criteria have been proposed,
+and some of them have been implemented in
 <code><a href="../reference/assess_replication_outcome.html">assess_replication_outcome()</a></code> - we will briefly introduce
 them here, and then compare their results.</p>
 <div class="section level3">
 <h3 id="repeated-significance">Repeated significance<a class="anchor" aria-label="anchor" href="#repeated-significance"></a>
 </h3>
 <p>Potentially the most basic question is whether a replication again
-yields a statistically significant result. This has been used to
-generate many of the headline findings about replicability, and is
-easily interpretable. However, there are some limitations:</p>
+yields a statistically significant result in the same direction as the
+original finding. This has been used to generate many of the previous
+headline findings about replicability, and is easily interpretable.
+However, there are some limitations:</p>
 <ul>
 <li>It ignores the evidence provided by the original study entirely, and
 might thus assume that a difference in significance is statistically
 significant.</li>
 <li>It does not consider the size of the effect, so that large-scale
-replications that find tiny effects may be considered successful.</li>
+replications that find tiny effects may still be considered
+successful.</li>
 <li>It does not consider the quality of the replication, so that a
 replication with a tiny sample size may be reported as a failed
 replication, while it does not tell us anything about the original
 effect.</li>
 </ul>
-<p>To assess replication success in that way, use
-<code>criterion = "significance_r"</code> in
-<code><a href="../reference/assess_replication_outcome.html">assess_replication_outcome()</a></code>.</p>
+<p>To use this criterion, set <code>criterion = "significance_r"</code>
+in <code><a href="../reference/assess_replication_outcome.html">assess_replication_outcome()</a></code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assess_replication_outcome.html">assess_replication_outcome</a></span><span class="op">(</span>es_o <span class="op">=</span> <span class="fl">.5</span>, n_o <span class="op">=</span> <span class="fl">50</span>, es_r <span class="op">=</span> <span class="fl">.1</span>, n_r <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>                           criterion <span class="op">=</span> <span class="st">"significance_r"</span><span class="op">)</span></span>
@@ -118,13 +119,13 @@ effect.</li>
 </h3>
 <p>Another approach is to aggregate the effect sizes from the original
 and replication studies using a meta-analytic approach and assess
-whether the combined effect is significantly different from zero. This
+whether their combined effect is significantly different from zero. This
 method considers the evidence from both studies together, offering a
 more integrated perspective.</p>
 <p>However, it assumes that the quality of evidence from both studies is
 comparable - which may not be the case if the original study is likely
-to have been subject to selective reporting (i.e. publication bias) or
-other Questionable Research Practices. In that case, the reported effect
+to have been subject to selective reporting (i.e., publication bias) or
+other questionable research practices. In that case, the reported effect
 sizes are likely inflated, so that more trust should be placed in the
 replication study.</p>
 <p>To use this criterion, set
@@ -148,11 +149,12 @@ taking into account the uncertainty of the replication study.</p>
 <p>This method is beneficial because it directly compares the two
 studies, emphasizing whether the original result is plausible given the
 replication data. However, it makes lower-powered replications more
-likely to be “successful”, even if their point estimate is far from the
-original effect size. Conversely, it makes large (and thus more precise)
-replications more likely “fail”, even if their point estimate is close
-to the original effect size.</p>
-<p>To assess this, use <code>criterion = "consistency_ci"</code>.</p>
+likely to be considered “successful”, even if their point estimate is
+far from the original effect size. Conversely, it makes large (and thus
+more precise) replications more likely to be considered “failed”, even
+if their point estimate is close to the original effect size.</p>
+<p>To use this criterion, set
+<code>criterion = "consistency_ci"</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assess_replication_outcome.html">assess_replication_outcome</a></span><span class="op">(</span>es_o <span class="op">=</span> <span class="fl">.5</span>, n_o <span class="op">=</span> <span class="fl">50</span>, es_r <span class="op">=</span> <span class="fl">.3</span>, n_r <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>                           criterion <span class="op">=</span> <span class="st">"consistency_ci"</span><span class="op">)</span></span>
@@ -175,7 +177,8 @@ than confidence intervals.</p>
 both the original and replication studies. However, particularly for
 small replication studies, the prediction interval may be very wide,
 making it very difficult to reject them through replications.</p>
-<p>To use this method, set <code>criterion = "consistency_pi"</code></p>
+<p>To use this criterion, set
+<code>criterion = "consistency_pi"</code></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assess_replication_outcome.html">assess_replication_outcome</a></span><span class="op">(</span>es_o <span class="op">=</span> <span class="fl">.5</span>, n_o <span class="op">=</span> <span class="fl">50</span>, es_r <span class="op">=</span> <span class="fl">.3</span>, n_r <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>                           criterion <span class="op">=</span> <span class="st">"consistency_pi"</span><span class="op">)</span></span>
@@ -193,13 +196,13 @@ heterogeneity test (i.e., a Q-test). This is the most rigorous test for
 the question whether a replication contradicts an original study (if the
 original study’s claim is taken to encompass its full statistical
 uncertainty).</p>
-<p>However, this test generally has low power, again making replication
+<p>However, this test generally has low power, making replication
 failures for <em>small</em> original studies rather unlikely. Also, note
 that effect sizes can be homogeneous even if the joint effect is not
 significant, so that a replication might be considered successful even
 if the aggregate evidence does not support the existence of an
 effect.</p>
-<p>To assess replication success using this approach, use
+<p>To use this criterion, set
 <code>criterion = "homogeneity"</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assess_replication_outcome.html">assess_replication_outcome</a></span><span class="op">(</span>es_o <span class="op">=</span> <span class="fl">.2</span>, n_o <span class="op">=</span> <span class="fl">100</span>, es_r <span class="op">=</span> <span class="fl">0</span>, n_r <span class="op">=</span> <span class="fl">500</span>,</span>
@@ -218,7 +221,7 @@ zero. This method provides a balanced assessment that considers both
 consistency and evidence strength - yet still has low power to identify
 replication failures driven by an exaggeration of the reported effect
 size in small studies.</p>
-<p>To apply this, set
+<p>To use this criterion, set
 <code>criterion = "homogeneity_significance"</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assess_replication_outcome.html">assess_replication_outcome</a></span><span class="op">(</span>es_o <span class="op">=</span> <span class="fl">.2</span>, n_o <span class="op">=</span> <span class="fl">100</span>, es_r <span class="op">=</span> <span class="fl">0</span>, n_r <span class="op">=</span> <span class="fl">500</span>,</span>
@@ -240,7 +243,7 @@ However, this can label replications with substantial effect sizes as
 failures if the original study was very small, so it is not an
 appropriate criterion if the focus is on the truth of claims, rather
 than the quality of evidence.</p>
-<p>To use this method, set
+<p>To use this criterion, set
 <code>criterion = "small_telescopes"</code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assess_replication_outcome.html">assess_replication_outcome</a></span><span class="op">(</span>es_o <span class="op">=</span> <span class="fl">.5</span>, n_o <span class="op">=</span> <span class="fl">50</span>, es_r <span class="op">=</span> <span class="fl">.2</span>, n_r <span class="op">=</span> <span class="fl">100</span>,</span>
@@ -317,7 +320,7 @@ been coded.</p>
 <span><span class="va">p</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu">plotly</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plotly/man/ggplotly.html" class="external-link">ggplotly</a></span><span class="op">(</span>tooltip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"text"</span>, <span class="st">"n"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="plotly html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:1152px;height:576px;"></div>
-<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"data":[{"orientation":"v","width":[0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.90000000000000036,0.89999999999999991,0.90000000000000036,0.90000000000000036,0.90000000000000036],"base":[956,1156,1290,1424,1468,1341,1612,1788,1905,1994],"x":[7,4,6,3,2,5,1,5,5,6],"y":[1044,844,704,576,532,447,388,117,95,6],"text":["n: 1044<br />Original effect size is not within replication's CI","n:  844<br />original study had < 33% power to detect replication effect","n:  704<br />replication effect is not significant","n:  576<br />effects are heterogeneous","n:  532<br />Replication effect size is not within the prediction interval","n:  447<br />effect sizes are not homogeneous but jointly significantly above 0","n:  388<br />aggregated effect is not larger than 0","n:  117<br />effect sizes are not homogeneous and not significant","n:   95<br />effect sizes are homogeneous but not significant","n:    6<br />direction of effect is inconsistent"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(252,141,98,1)","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"name":"failure","legendgroup":"failure","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":[0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036],"base":[1009,1077,1249,1065,1060,1073],"x":[6,5,5,5,5,5],"y":[281,172,92,8,5,4],"text":["n:  281<br />original effect is not significant","n:  172<br />effect sizes are homogeneous but not significant","n:   92<br />effect sizes are homogeneous and jointly significantly above 0","n:    8<br />effect sizes are not homogeneous but jointly significantly above 0","n:    5<br />NA","n:    4<br />effect sizes are not homogeneous and not significant"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(191,191,191,1)","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"name":"OS not significant","legendgroup":"OS not significant","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":[0.89999999999999991,0.90000000000000013,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036],"base":[319,320,319,300,314,271,278],"x":[1,2,3,4,5,6,7],"y":[1293,1148,1105,856,746,738,678],"text":["n: 1293<br />aggregated effect is larger than 0 and in the same direction","n: 1148<br />Replication effect size is within the prediction interval","n: 1105<br />effects are not heterogeneous","n:  856<br />original study had >= 33% power to detect replication effect","n:  746<br />effect sizes are homogeneous and jointly significantly above 0","n:  738<br />replication effect is significant","n:  678<br />Original effect size is within replication's CI"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(102,194,165,1)","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"name":"success","legendgroup":"success","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":[0.90000000000000013,0.89999999999999991,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036],"base":[0,0,0,0,0,0,0],"x":[2,1,3,5,4,7,6],"y":[320,319,319,314,300,278,271],"text":["n:  320<br />NA","n:  319<br />NA","n:  319<br />NA","n:  314<br />NA","n:  300<br />NA","n:  278<br />NA","n:  271<br />NA"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(127,127,127,1)","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"name":"NA","legendgroup":"NA","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[646.5,574,552.5,428,373,369,339],"text":["64.6 %","57.4 %","55.2 %","42.8 %","37.3 %","36.9 %","33.9 %"],"hovertext":["","","","","","",""],"textfont":{"size":14.66456692913386,"color":"rgba(0,0,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"success","legendgroup":"success","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":30.611872146118724,"r":7.3059360730593621,"b":97.646345901932747,"l":48.949771689497723},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,7.5999999999999996],"tickmode":"array","ticktext":["Significance<br />(aggregated)","Consistency<br />(prediction interval)","Homogeneity","Small Telescopes","Homogeneity +<br />Significance","Significance<br />(replication)","Consistency<br />(confidence interval)"],"tickvals":[1,2,3,4.0000000000000009,5,6,7],"categoryorder":"array","categoryarray":["Significance<br />(aggregated)","Consistency<br />(prediction interval)","Homogeneity","Small Telescopes","Homogeneity +<br />Significance","Significance<br />(replication)","Consistency<br />(confidence interval)"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-45,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Success criterion","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-100,2100],"tickmode":"array","ticktext":["0","500","1000","1500","2000"],"tickvals":[0,500,1000,1500,2000],"categoryorder":"array","categoryarray":["0","500","1000","1500","2000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"k","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"outcome","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"21517e551d75":{"x":{},"y":{},"fill":{},"text":{},"type":"bar"},"215156628922":{"x":{},"y":{},"fill":{},"label":{}}},"cur_data":"21517e551d75","visdat":{"21517e551d75":["function (y) ","x"],"215156628922":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"data":[{"orientation":"v","width":[0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.90000000000000036,0.89999999999999991,0.90000000000000036,0.90000000000000036,0.90000000000000036],"base":[956,1156,1290,1424,1468,1341,1612,1788,1905,1994],"x":[7,4,6,3,2,5,1,5,5,6],"y":[1044,844,704,576,532,447,388,117,95,6],"text":["n: 1044<br />Original effect size is not within replication's CI","n:  844<br />original study had < 33% power to detect replication effect","n:  704<br />replication effect is not significant","n:  576<br />effects are heterogeneous","n:  532<br />Replication effect size is not within the prediction interval","n:  447<br />effect sizes are not homogeneous but jointly significantly above 0","n:  388<br />aggregated effect is not larger than 0","n:  117<br />effect sizes are not homogeneous and not significant","n:   95<br />effect sizes are homogeneous but not significant","n:    6<br />direction of effect is inconsistent"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(252,141,98,1)","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"name":"failure","legendgroup":"failure","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":[0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036],"base":[1009,1077,1249,1065,1060,1073],"x":[6,5,5,5,5,5],"y":[281,172,92,8,5,4],"text":["n:  281<br />original effect is not significant","n:  172<br />effect sizes are homogeneous but not significant","n:   92<br />effect sizes are homogeneous and jointly significantly above 0","n:    8<br />effect sizes are not homogeneous but jointly significantly above 0","n:    5<br />NA","n:    4<br />effect sizes are not homogeneous and not significant"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(191,191,191,1)","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"name":"OS not significant","legendgroup":"OS not significant","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":[0.89999999999999991,0.90000000000000013,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036],"base":[319,320,319,300,314,271,278],"x":[1,2,3,4,5,6,7],"y":[1293,1148,1105,856,746,738,678],"text":["n: 1293<br />aggregated effect is larger than 0 and in the same direction","n: 1148<br />Replication effect size is within the prediction interval","n: 1105<br />effects are not heterogeneous","n:  856<br />original study had >= 33% power to detect replication effect","n:  746<br />effect sizes are homogeneous and jointly significantly above 0","n:  738<br />replication effect is significant","n:  678<br />Original effect size is within replication's CI"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(102,194,165,1)","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"name":"success","legendgroup":"success","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":[0.90000000000000013,0.89999999999999991,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036],"base":[0,0,0,0,0,0,0],"x":[2,1,3,5,4,7,6],"y":[320,319,319,314,300,278,271],"text":["n:  320<br />NA","n:  319<br />NA","n:  319<br />NA","n:  314<br />NA","n:  300<br />NA","n:  278<br />NA","n:  271<br />NA"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(127,127,127,1)","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"name":"NA","legendgroup":"NA","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1,2,3,4,5,6,7],"y":[646.5,574,552.5,428,373,369,339],"text":["64.6 %","57.4 %","55.2 %","42.8 %","37.3 %","36.9 %","33.9 %"],"hovertext":["","","","","","",""],"textfont":{"size":14.66456692913386,"color":"rgba(0,0,0,1)"},"type":"scatter","mode":"text","hoveron":"points","name":"success","legendgroup":"success","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":30.611872146118724,"r":7.3059360730593621,"b":97.646345901932747,"l":48.949771689497723},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,7.5999999999999996],"tickmode":"array","ticktext":["Significance<br />(aggregated)","Consistency<br />(prediction interval)","Homogeneity","Small Telescopes","Homogeneity +<br />Significance","Significance<br />(replication)","Consistency<br />(confidence interval)"],"tickvals":[1,2,3,4.0000000000000009,5,6,7],"categoryorder":"array","categoryarray":["Significance<br />(aggregated)","Consistency<br />(prediction interval)","Homogeneity","Small Telescopes","Homogeneity +<br />Significance","Significance<br />(replication)","Consistency<br />(confidence interval)"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-45,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Success criterion","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-100,2100],"tickmode":"array","ticktext":["0","500","1000","1500","2000"],"tickvals":[0,500,1000,1500,2000],"categoryorder":"array","categoryarray":["0","500","1000","1500","2000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"k","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"outcome","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"223c690e0d50":{"x":{},"y":{},"fill":{},"text":{},"type":"bar"},"223c64cebda3":{"x":{},"y":{},"fill":{},"label":{}}},"cur_data":"223c690e0d50","visdat":{"223c690e0d50":["function (y) ","x"],"223c64cebda3":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
