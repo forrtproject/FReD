@@ -48,7 +48,11 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">read_fred</span><span class="op">(</span>data <span class="op">=</span> <span class="fu">get_param</span><span class="op">(</span><span class="st">"FRED_DATA_FILE"</span><span class="op">)</span>, retain_es_as_character <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">read_fred</span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="fu">get_param</span><span class="op">(</span><span class="st">"FRED_DATA_FILE"</span><span class="op">)</span>,</span>
+<span>  retain_es_as_character <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -61,6 +65,10 @@
 
 <dt id="arg-retain-es-as-character">retain_es_as_character<a class="anchor" aria-label="anchor" href="#arg-retain-es-as-character"></a></dt>
 <dd><p>Should effect sizes be retained as character? Defaults to TRUE, so that coded test statistics with df can be converted to common metric.</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Should detailed messages be printed that highlight data conversion issues? Defaults to TRUE. FALSE is quiet mode, and NULL prints a summary of problems.</p></dd>
 
 </dl></div>
     <div class="section level2">
