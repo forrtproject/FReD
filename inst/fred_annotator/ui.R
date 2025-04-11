@@ -107,19 +107,39 @@ about_content <- nav_panel("About",
                                "))
 )
 
-# Construct the page_navbar UI
 ui <- tagList(
-  shinyjs::useShinyjs(),
-  tags$head(tags$style(HTML(custom_css))),
+  tags$head(
+    tags$style(HTML("
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+        margin-left: 15px;
+        height: 50px;
+      }
+      .navbar-brand img {
+        margin-right: 10px;
+      }
+      .navbar-nav > li > a {
+        line-height: 50px !important;
+      }
+      .dark-mode-nav {
+        margin-left: auto;
+      }
+    "))
+  ),
   page_navbar(
-  theme = custom_theme,
-  id = "navbar",
-  title = div(img(src = "fred.png", height = 67 / 2.5, width = 715 / 2.5), style = "padding: 10px; display: flex; align-items: center;"),
-  window_title = "FReD Annotator",
-  sidebar = sidebar_contents,
-  introduction_content,
-  study_selection_content,
-  report_content,
-  about_content
-)
+    theme = custom_theme,
+    id = "navbar",
+    title = tags$a(
+      class = "navbar-brand",
+      href = "#",
+      tags$img(src = "fred.png", height = "40")
+    ),
+    sidebar = sidebar_contents,
+    introduction_content,
+    study_selection_content,
+    report_content,
+    about_content,
+    nav_item(input_dark_mode(), class = "dark-mode-nav")
+  )
 )

@@ -201,39 +201,60 @@ about_content <- nav_panel(
 # Construct the page_navbar UI
 ui <- tagList(
   shinyjs::useShinyjs(),
-  tags$head(tags$style(HTML(custom_css))),
+  tags$head(
+    tags$style(HTML(paste0(custom_css, "
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+        margin-left: 15px;
+        height: 50px;
+      }
+      .navbar-brand img {
+        margin-right: 10px;
+      }
+      .navbar-nav > li > a {
+        line-height: 50px !important;
+      }
+      .dark-mode-nav {
+        margin-left: auto;
+      }
+    ")))
+  ),
   tags$script(HTML("
       $(document).on('shiny:inputchanged', function(event) {
-    if (event.name === 'navbar') {
-        var tabsWithoutSidebar = ['Dataset', 'References-Checker [alpha]', 'References', 'FAQ', 'About'];  // Tabs where sidebar should be disabled
-      if (tabsWithoutSidebar.includes(event.value)) {
-        $('#sidebar .shiny-input-container').not('#success_criterion').addClass('disabled');
-        $('#sidebar-note').show();
-      } else {
-        $('#sidebar .shiny-input-container').removeClass('disabled');
-        $('#sidebar-note').hide();
-      }
-    }
-  });
-
-  $(document).on('shiny:connected', function(event) {
-    $('<style type=\"text/css\"> .shiny-input-container.disabled * { pointer-events: none; opacity: 0.5; } </style>').appendTo('head');
-  });
+        if (event.name === 'navbar') {
+          var tabsWithoutSidebar = ['Dataset', 'References-Checker [alpha]', 'References', 'FAQ', 'About'];
+          if (tabsWithoutSidebar.includes(event.value)) {
+            $('#sidebar .shiny-input-container').not('#success_criterion').addClass('disabled');
+            $('#sidebar-note').show();
+          } else {
+            $('#sidebar .shiny-input-container').removeClass('disabled');
+            $('#sidebar-note').hide();
+          }
+        }
+      });
+      $(document).on('shiny:connected', function(event) {
+        $('<style type=\"text/css\"> .shiny-input-container.disabled * { pointer-events: none; opacity: 0.5; } </style>').appendTo('head');
+      });
   ")),
   page_navbar(
     theme = custom_theme,
     id = "navbar",
-    title = div(img(src = "fred.png", height = 67 / 2.5, width = 715 / 2.5), style = "padding: 10px; display: flex; align-items: center;"),
+    title = tags$a(
+      class = "navbar-brand",
+      href = "#",
+      tags$img(src = "fred.png", height = 67 / 2.5, width = 715 / 2.5)
+    ),
     window_title = "FReD Explorer",
     sidebar = sidebar_contents,
     replicability_tracker_content,
     study_overview_content,
-    dataset_content,
+    #dataset_content, out for now
     correlates_content,
-    # moderators_content, # temporarily commented out until we found a stable and quick way to run these analyses
-    # references_checker_content, # commented out because we have the separate app for it but left here in case we want to compare the two versions
     references_content,
     faq_content,
-    about_content
+    about_content,
+    nav_item(input_dark_mode(), class = "dark-mode-nav")
   )
 )
+
