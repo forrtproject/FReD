@@ -146,7 +146,7 @@ server <- function(input, output, session) {
 
     # Process text box input
     if (nchar(input$references) > 0) {
-      text_dois <- extract_dois_from_text(input$references)
+      text_dois <- extract_dois_from_text(input$references, report = TRUE)
       dois <- c(dois, text_dois)
     }
 
@@ -168,8 +168,6 @@ server <- function(input, output, session) {
         "Please check the format of the input",
         easyClose = TRUE
       ))
-    } else {
-      showNotification(paste("Found and added", length(out), "DOIs."))
     }
 
     out
@@ -234,7 +232,7 @@ server <- function(input, output, session) {
   outputOptions(output, "doi_display", suspendWhenHidden = FALSE)
 
 
-  extract_dois_from_text <- function(text) {
+  extract_dois_from_text <- function(text, report = FALSE) {
 
     pattern <- "10(?:\\.[0-9]{4,})?\\/[^\\s]*[^\\s\\.,]" # based on pattern used by Zotero Chrome plugin
     dois <- regmatches(text, gregexpr(pattern, text, perl = TRUE))
@@ -250,7 +248,21 @@ server <- function(input, output, session) {
       }
     })
 
-    unname(dois)
+
+    dois <- unique(unname(dois))
+
+    if (report) {
+    # Count number of non-blank lines
+    n_lines <- sum(nzchar(trimws(unlist(strsplit(text, "\n")))))
+
+      showNotification(paste("Found and added", length(dois), ifelse(length(dois) == 1, "DOI", " distinct DOIs"),
+                             "from", n_lines, ifelse(n_lines == 1, "line", "lines"), "of text input."),
+                       type = "message", duration = 10)
+
+    }
+
+      dois
+
   }
 
 
@@ -267,7 +279,15 @@ server <- function(input, output, session) {
         dois <- extract_dois_from_text(bib_text)
       }
     }
-    return(dois)
+
+    dois <- unique(unname(dois))
+
+    showNotification(paste("Found and added", length(dois), ifelse(length(dois) == 1, "DOI", " distinct DOIs"),
+                           "from your file."),
+                     type = "message", duration = 10)
+
+    dois
+
   }
 
 
