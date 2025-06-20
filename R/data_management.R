@@ -7,12 +7,22 @@
 #' @noRd
 
 return_inbuilt <- function(item) {
-  assert_choice(item, c("data", "data_description", "data_changelog", "citation"))
+  assert_choice(item, c("data", "data_description", "data_changelog", "citation", "data_date"))
+  if (item == "data_date") {
+    date_only <- TRUE
+    item <- "data"
+  } else {
+      date_only <- FALSE
+    }
   data <- system.file("extdata", "snapshot", paste0(item, ".RDS"), package = "FReD")
   data <- readRDS(data)
-  if (!get_param("FRED_OFFLINE")) {
+
+  if (!get_param("FRED_OFFLINE") & !date_only) {
     last_updated <- format(attr(data, "last_updated"), "%d-%m-%Y %I:%M%p")
     message("Using inbuilt ", item, " last updated on ", last_updated, ". This is likely because of an issue with your internet connection, or with the online data source. If this is unexpected and persists, please report this issue on GitHub.")
+  }
+  if (date_only) {
+    return(attr(data, "last_updated"))
   }
   data
 }

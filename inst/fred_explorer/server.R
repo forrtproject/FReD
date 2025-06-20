@@ -24,6 +24,9 @@ server <- function(input, output, session) {
 
   df_temp <- reactiveVal()
 
+  min_power_debounced <- reactive({input$minpower}) %>%
+     debounce(500)
+
   # Update df_temp based on filters
   observe({
     df_temp <- df[rev(row.names(df)), ]
@@ -36,10 +39,10 @@ server <- function(input, output, session) {
     }
 
     # minpower
-    if (input$minpower == .05) {
+    if (min_power_debounced() == .05) {
       df_temp <- df_temp
     } else {
-      df_temp <- df_temp[df_temp$power_r >= input$minpower, ]
+      df_temp <- df_temp[df_temp$power_r >= min_power_debounced(), ]
     }
 
     # validated
@@ -97,6 +100,10 @@ server <- function(input, output, session) {
     df_temp()[input$table_rows_all, ] # rows on all pages (after being filtered)
   })
 
+  debounced_search <- reactive({
+    input$sidebar_search
+  }) %>% debounce(500)
+
 
   output$table <- DT::renderDT(server = FALSE, {
     ## apply filters
@@ -106,7 +113,6 @@ server <- function(input, output, session) {
 
     df_temp <- df_temp %>% dplyr::rename("LeBel result" = result2)
 
-    # df_temp_filtered <- df_temp[, c("description", "n_original", "n_replication", "power", "result")]
     df_temp_filtered <- df_temp[, c(
       "description", "tags", "osf_link" # link to project site of the replication (url_r)
       # , "es_original", "es_replication"
@@ -119,13 +125,15 @@ server <- function(input, output, session) {
       selection = "multiple",
       options = list(
         scrollX = TRUE,
-        dom = "Bfrtip",
+        dom = "Brtip",
         buttons = c("copy", "csv", "excel"),
-        pageLength = 5
-        # , lengthMenu = c(5, 10, 100) # XXX not working yet
-      ), rownames = FALSE
+        pageLength = 5,
+      search = list(
+        search = debounced_search() # Link to the debounced sidebar search
+      )
+      ),
+      rownames = FALSE
       # , options = list(pageLength = 5)
-      # , rownames = FALSE
     )
   })
 
@@ -430,17 +438,8 @@ server <- function(input, output, session) {
   #LW to check: is this needed?
 
   aggregate_results <- function(df, ..., result = "result", mixed_text = "mixed", NA_text = "not coded yet") {
-    # # Dynamically determining the column to operate on
-    # result_sym <- if (is.null(result)) {
-    #
-    #    if (is.null(input$result_var)) {
-    #     stop("Input for 'result' is required when 'result' argument is NULL.")
-    #   } else {
-    #     sym(input$result_var)
-    #   }
-    # } else {
+
     result_sym <- ensym(result)
-    # }
 
     # Replace NA values in the chosen result column with NA_text
     df <- df %>%
