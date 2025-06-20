@@ -58,11 +58,9 @@ sidebar_contents <- sidebar(
               choices = large_scale_project_choices,
               selected = "All studies"
   ),
-  tags$style(HTML("
-            #result_var {
-              display: none;
-            }
-          ")), # Remove this to actually use the result_var input
+  hr(),
+  textInput("sidebar_search", "Search to filter dataset:", placeholder = "e.g., author, title, keyword"),
+  hr(),
   checkboxInput("validated", "Show validated entries only", value = TRUE),
   checkboxInput("codedentries", "Show coded entries only", value = TRUE),
   hr(),
