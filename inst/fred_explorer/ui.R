@@ -51,7 +51,7 @@ sidebar_contents <- sidebar(
                   "Minimum Power",
                   icon(c("info-circle"))
                 ),
-                "Power is computed based on the original effect size and the replication sample size under the assumption that this is a correlation test. Studies are not filtered for power when this slider is at 5%. When using values larger than 5%, studies that lack information (N or ES) are being filtered out.
+                "Power is computed based on the original effect size and the replication sample size under the assumption that this is a correlation test. Studies are not filtered for power when this slider is at 5%. When using values larger than 5%, studies that lack information (N or ES) are being filtered out."
               )
               , min = .05, max = .999, value = .05),
   selectInput("source", "Browse Large-Scale Projects:",
