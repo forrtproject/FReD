@@ -65,6 +65,7 @@ introduction_content <- nav_panel(
 study_selection_content <- nav_panel(
   "Study Selection",
   h2("Selected studies"),
+  HTML(paste("<a href=https://github.com/forrtproject/FReD/issues/new?template=doi-reading-issue.md>Please report potential issues with DOI processing.</a>", collapse = "")),
          DTOutput("selected_references", fill = FALSE),
   h2("Available studies in FReD"),
   HTML(paste("Select/unselect rows to add/remove studies from the report. You can search by DOI, reference or description.
