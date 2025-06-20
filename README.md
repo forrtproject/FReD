@@ -1,4 +1,4 @@
-# FReD
+# FReD <a href="http://forrt.org/FReD/"><img src="man/figures/logo.png" align="right" height="120" alt="FReD website" /></a>
 
 <!-- badges: start -->
 

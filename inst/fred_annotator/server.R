@@ -487,7 +487,8 @@ server <- function(input, output, session) {
       summarise(
         outcome_report = if(length(unique(outcome_report)) == 1) unique(outcome_report) else paste(outcome_report, collapse = ", "),
         outcome = case_when(
-                  all(outcome == "success") ~ "success",
+                  all(is.na(outcome)) ~ "not coded",
+                  all(outcome == "success") ~ "  success",
                   all(outcome == "failure") ~ "failure",
                   all(outcome == "OS not significant") ~ "OS not significant",
                   .default = "mixed"),
@@ -497,78 +498,121 @@ server <- function(input, output, session) {
       summarise(
           replications = paste0("  - **", cap_first_letter(dplyr::coalesce(outcome_report, "not coded")), ":** ", ref_replication, collapse = "\n"),
           overall_outcome = case_when(
-            all(outcome == "success") ~ if (return_html) "<span style='color: darkgreen;'>&#x2714;</span>" else "[Re]", # ✔️
-            all(outcome == "failure") ~ if (return_html) "<span style='color: darkred;'>&#x2716;</span>" else "[¬Re]", #✖️
-            all(outcome == "OS not significant") ~ if (return_html) "&#x1F6AB;" else "[NA]", # 🚫
-            .default = if (return_html) "&#x2753;" else "[?Re]" #❓
+            all(outcome == "not coded") ~ if (return_html) "&#x270F;" else "[NC]",
+            all(outcome == "success") ~ if (return_html) "<span style='color: darkgreen;'>&#x2714;</span>" else "[Re]",
+            all(outcome == "failure") ~ if (return_html) "<span style='color: darkred;'>&#x2716;</span>" else "[¬Re]",
+            all(outcome == "OS not significant") ~ if (return_html) "&#x2754;" else "[N/A]", # Using a dash for N/A
+            .default = if (return_html) "&#x2753;" else "[?Re]"
           )
       ) %>%
       mutate(ref_original = ref_original)
-
   }
 
-  generate_markdown <- function(df_filtered, ...) {
 
+  generate_markdown <- function(df_filtered, ...) {
+    # Call the new legend function
+    legend <- generate_legend_markdown(input$success_criterion)
 
     extra_args <- list(...)
     extra_args["success_criterion"] <- input$success_criterion
-    df_filtered %>%
-      mutate(
-        # Replace newline characters with spaces in ref_original
-        ref_original = stringr::str_replace_all(ref_original, "\n", " "),
-        # Append DOI link to ref_original if not already present
-        ref_original = ifelse(stringr::str_detect(ref_original, stringr::fixed("doi.org")),
-                              ref_original,
-                              paste0(ref_original, " [https://doi.org/", doi_original, "](https://doi.org/", doi_original, ")")),
-        # Construct doi_urls from doi_replication or osf_link
-        doi_urls = ifelse(!is.na(doi_replication),
-                          paste0("https://doi.org/", doi_replication),
-                          ifelse(!is.na(osf_link), osf_link, "")),
-        # Replace newline characters with spaces in ref_replication
-        ref_replication = stringr::str_replace_all(ref_replication, "\n", " "),
-        # Append doi_urls to ref_replication if not already present
-        ref_replication = ifelse(stringr::str_detect(ref_replication, stringr::fixed("doi.org")),
-                                 ref_replication,
-                                 paste0(ref_replication, " [", doi_urls, "](", doi_urls, ")")),
-        id_original = coalesce(doi_original, ref_original)
-      )  %>%
-      group_by(id_original) %>%
-      group_modify(~do.call(assess_outcome, c(list(.x), extra_args))) %>%
-      ungroup() %>%
-      mutate(
-        markdown = paste0(
-          "##### ", overall_outcome, " ", ref_original, "\n\n",
-          replications, "\n\n"
-        )
-      ) %>%
-      pull(markdown) %>%
-      paste(collapse = "\n") %>%
-      paste0("## Replication Outcomes\n\n", ., "\n\n\n*Note:* ", success_criterion_note[input$success_criterion])
+
+    # The main body of the report is generated here
+    report_body <- if (nrow(df_filtered) > 0) {
+      df_filtered %>%
+        mutate(
+          ref_original = stringr::str_replace_all(ref_original, "\n", " "),
+          ref_original = ifelse(stringr::str_detect(ref_original, stringr::fixed("doi.org")),
+                                ref_original,
+                                paste0(ref_original, " [https://doi.org/", doi_original, "](https://doi.org/", doi_original, ")")),
+          doi_urls = ifelse(!is.na(doi_replication),
+                            paste0("https://doi.org/", doi_replication),
+                            ifelse(!is.na(osf_link), osf_link, "")),
+          ref_replication = stringr::str_replace_all(ref_replication, "\n", " "),
+          ref_replication = ifelse(stringr::str_detect(ref_replication, stringr::fixed("doi.org")) | doi_urls == "",
+                                   ref_replication,
+                                   paste0(ref_replication, " [", doi_urls, "](", doi_urls, ")")),
+          id_original = coalesce(doi_original, ref_original)
+        ) %>%
+        group_by(id_original) %>%
+        group_modify(~do.call(assess_outcome, c(list(.x), extra_args))) %>%
+        ungroup() %>%
+        mutate(
+          markdown = paste0(
+            "##### ", overall_outcome, " ", ref_original, "\n\n",
+            replications, "\n\n"
+          )
+        ) %>%
+        pull(markdown) %>%
+        paste(collapse = "\n")
+    } else {
+      "" # Return empty string if no data
+    }
+
+    # Combine the legend and the report body
+    final_report <- paste0(
+      legend,
+      "\n## Replication Outcomes\n\n",
+      report_body
+    )
+
+    return(final_report)
   }
 
-  output$success_note <- renderUI({
-    tags$div(
-      HTML(markdown::markdownToHTML(text = paste0("*Note:* ", success_criterion_note[input$success_criterion]), fragment.only = TRUE))
+
+  #' Generate Markdown for the Report Legend
+  #'
+  #' Creates a markdown table explaining the symbols used in the report,
+  #' dynamically including the note for the selected success criterion.
+  #'
+  #' @param success_criterion The currently selected success criterion from the UI.
+  #' @return A character string containing the markdown for the legend.
+  generate_legend_markdown <- function(success_criterion) {
+    criterion_explanation <- success_criterion_note[success_criterion]
+
+
+
+    legend_md <- glue::glue(
+      "**Note:** {criterion_explanation}\n\n",
+      "### Legend\n\n",
+
+      "| &nbsp; | &nbsp; |\n",
+
+      "|:------:|:----------------------------------------------------------|\n",
+
+      "| <span style='color: darkgreen;'>&#x2714;</span> | *Success*: All replications of the original study were successful. |\n",
+      "| <span style='color: darkred;'>&#x2716;</span> | *Failure*: All replications of the original study failed. |\n",
+      "| &#x2753; | *Mixed Results*: The replications of the original study had mixed outcomes (e.g., some succeeded, some failed). |\n",
+
+      if (success_criterion_o_ns[success_criterion]) {
+        "| &#x2754; | *Original Not Significant*: The original study's p-value was >= .05, so 'success' is not applicable. |\n"
+      } else {
+        ""
+      },
+
+      "| &#x270F; | *Not Coded*: The outcome of the replication(s) has not yet been coded. |"
+
     )
+    return(legend_md)
+  }
+
+    markdown_output <- reactive({
+    generate_markdown(selected_refs())
   })
 
-  output$refs_annotated <- renderUI({
+    output$refs_annotated <- renderUI({
+      # Validate that there are selected references
+      validate(
+        need(nrow(selected_refs()) > 0, "", label = "No replications found")
+      )
 
-    df <- selected_refs()
-
-    validate(
-      need(nrow(df) > 0, "", label = "No replications found")
-    )
-
-    markdown_output <- generate_markdown(df)
-
-    tags$div(
-      class = "page-like",
-      style = "white-space: pre-wrap; overflow-y: auto; max-height: 800px;",
-      HTML(markdown::markdownToHTML(text = markdown_output, fragment.only = TRUE))
-    )
-
+      # Render the markdown from the reactive expression
+      tags$div(
+        class = "page-like",
+        style = "white-space: pre-wrap; overflow-y: auto; max-height: 800px;",
+        HTML(markdown::markdownToHTML(text = paste("# Replication Report\n", markdown_output()), fragment.only = TRUE))
+      )
     })
+
 
 
   # observe({
@@ -617,18 +661,14 @@ server <- function(input, output, session) {
     content = function(file) {
       tempReport <- tempfile(fileext = ".Rmd")
 
-      df <- selected_refs()
-
-      markdown_output <- generate_markdown(df, return_html = TRUE)
-
       # Create the Rmd content
       rmd_content <- paste0(
         "---\n",
         "title: \"Annotated Reading List\"\n",
         "output:\n  word_document:\n    reference_docx: null\n",
         "---\n\n",
-        "*NB: This contains bookmarks that are likely displayed as []. You can change your Word settings to hide those; we are still working to remove them when creating the file.* \n",
-        markdown_output %>% stringr::str_remove(".*\n")
+        "*NB: This contains bookmarks that are likely displayed as []. You can change your Word settings to hide those; we are still working to remove them when creating the file.* \n\n",
+        markdown_output() %>% stringr::str_remove(".*\n")
       )
 
 

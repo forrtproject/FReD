@@ -37,17 +37,34 @@ success_criteria_colors <- tibble::tribble(
 )
 
 success_criterion_note <- c(
-  significance_r = "Success was based on whether the replication effect was statistically significant and in the same direction as the original. Note: *p*-values are calculated from raw effect sizes and sample sizes, and may differ from those reported in studies that adjusted for covariates or clustering.",
+  significance_r = "Success was based on whether the replication effect was statistically significant and in the same direction as the original. Beware: *p*-values are calculated from raw effect sizes and sample sizes, and may differ from those reported in studies that adjusted for covariates or clustering.",
 
-  significance_agg = "Success was based on whether a meta-analytic combination of original and replication effects was statistically significant. Note: *p*-values are calculated from raw effect sizes and sample sizes, and may differ from those reported in studies that adjusted for covariates.",
+  significance_agg = "Success was based on whether a meta-analytic combination of original and replication effects was statistically significant. Beware: *p*-values are calculated from raw effect sizes and sample sizes, and may differ from those reported in studies that adjusted for covariates.",
 
-  consistency_ci = "Success was based on whether the original effect size fell within the confidence interval of the replication. Note: confidence intervals are based on raw effect sizes and sample sizes, and may differ from those reported in adjusted models.",
+  consistency_ci = "Success was based on whether the original effect size fell within the confidence interval of the replication. Beware: confidence intervals are based on raw effect sizes and sample sizes, and may differ from those reported in adjusted models.",
 
-  consistency_pi = "Success was based on whether the replication effect size fell within the prediction interval from the original study. Note: prediction intervals are based on raw effect sizes and sample sizes, and may differ from those reported in adjusted models.",
+  consistency_pi = "Success was based on whether the replication effect size fell within the prediction interval from the original study. Beware: prediction intervals are based on raw effect sizes and sample sizes, and may differ from those reported in adjusted models.",
 
-  homogeneity = "Success was based on a test of heterogeneity (Q-test) between original and replication effects. Note: test statistics are based on raw effect sizes and sample sizes, and may differ from those reported in adjusted analyses in the original reports.",
+  homogeneity = "Success was based on a test of heterogeneity (Q-test) between original and replication effects. Beware: test statistics are based on raw effect sizes and sample sizes, and may differ from those reported in adjusted analyses in the original reports.",
 
-  homogeneity_significance = "Success was based on both effect homogeneity and statistical significance. Replications where the effects were homogeneous and jointly significantly different from zero were considered as successes, while those that were either not homogeneous or not significantly different from zero were considered as failures. Note: all values are based on raw effect sizes and sample sizes, and may differ from those reported in adjusted models.",
+  homogeneity_significance = "Success was based on both effect homogeneity and statistical significance. Replications where the effects were homogeneous and jointly significantly different from zero were considered as successes, while those that were either not homogeneous or not significantly different from zero were considered as failures. Beware: all values are based on raw effect sizes and sample sizes, and may differ from those reported in adjusted models.",
 
-  small_telescopes = "Success was based on whether the replication effect exceeded the threshold that would give 33% power in the original study. Note: power was calculated based on a simple test of a correlation, thus not accounting for any specific design features relevant to the study."
+  small_telescopes = "Success was based on whether the replication effect exceeded the threshold that would give 33% power in the original study. Beware: power was calculated based on a simple test of a correlation, thus not accounting for any specific design features relevant to the study."
 )
+
+success_criterion_o_ns <- c(
+  significance_r = TRUE,
+
+  significance_agg = TRUE,
+
+  consistency_ci = FALSE,
+
+  consistency_pi = FALSE,
+
+  homogeneity = FALSE,
+
+  homogeneity_significance = TRUE,
+
+  small_telescopes = FALSE
+)
+
