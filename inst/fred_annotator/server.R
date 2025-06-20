@@ -236,11 +236,18 @@ server <- function(input, output, session) {
   extract_dois_from_text <- function(text, report = FALSE) {
 
     pattern <- "10(?:\\.[0-9]{4,})?\\/[^\\s]*[^\\s\\.,]" # based on pattern used by Zotero Chrome plugin
-    dois <- regmatches(text, gregexpr(pattern, text, perl = TRUE))
-    dois <- unlist(dois)
 
+    # Find DOIs in each element; returns a list (each element: DOIs found in input string)
+    matched <- regmatches(text, gregexpr(pattern, text, perl = TRUE))
+    dois <- unlist(matched)
     dois <- sub("\\s*([,;.])*$", "", dois)  # remove trailing punctuation
 
+
+    # Keep only the actual DOI (removing prefix)
+    dois_clean <- sub("(?i)(doi:(?:\\/\\/)?\\s*|https?://doi\\.org/)\\s*", "", dois, perl=TRUE)
+    dois_clean
+
+    # If a DOI ends with a closing parenthesis and there are more ')' than '(', remove trailing ')'
     dois <- sapply(dois, function(x) {
       if (substr(x, nchar(x), nchar(x)) == ")" && sum(strsplit(x, "")[[1]] == "(") < sum(strsplit(x, "")[[1]] == ")")) {
         substr(x, 1, nchar(x) - 1)
@@ -250,6 +257,7 @@ server <- function(input, output, session) {
     })
 
 
+    # deduplicate
     dois <- unique(unname(dois))
 
     if (report) {
