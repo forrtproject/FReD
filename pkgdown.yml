@@ -3,7 +3,7 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   success_criteria: success_criteria.html
-last_built: 2025-06-20T09:39Z
+last_built: 2025-06-20T10:51Z
 urls:
   reference: http://forrt.org/FReD/reference
   article: http://forrt.org/FReD/articles
