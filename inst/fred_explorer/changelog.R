@@ -1,12 +1,15 @@
 ## Changelog ---------------------------------------------------------------
 changelog <- HTML(paste("<h3><b>Changelog</b></h3><h5>"
-                        , "<i>This is a list of changes for the ReD-website and the dataset.</i>"
+                        , "<i>This is a list of changes for the FReD-website and the dataset.</i>"
 
                         # TEMPLATE FOR NEW VERSIONS
                         # , "</br></br><b>dd.mm.yyyy</b>"
                         # , "</br><i>App version: Version 0.4.xx</i>"
                         # , "</br><i>Dataset name: Red.xlsx (from osf.io/z5u9b)</i>"
                         # , "</br>- ..."
+
+                        , "</br></br><b>20.06.2025</b>"
+                        , "</br><i>Fixed several issues. For future changes, please see the Github project: https://github.com/forrtproject/FReD</i>"
 
                         , "</br></br><b>17.04.2024</b>"
                         , "</br><i>App version: Version 0.4.6</i>"
