@@ -76,7 +76,8 @@ server <- function(input, output, session) {
     showModal(modalDialog(
       title = "Loading Retraction Database",
       "Please wait while the retraction database is being loaded.",
-      easyClose = FALSE
+      easyClose = FALSE,
+      footer = modalButton("Cancel") # so that button does not say "Dismiss"
     ))
     retracted_dois(load_retractionwatch() %>%
                      dplyr::filter(RetractionNature == "Retraction") %>%

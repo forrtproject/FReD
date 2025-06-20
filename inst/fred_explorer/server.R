@@ -114,7 +114,7 @@ server <- function(input, output, session) {
     df_temp <- df_temp %>% dplyr::rename("LeBel result" = result2)
 
     df_temp_filtered <- df_temp[, c(
-      "description", "tags", "osf_link"
+      "description", "tags", "osf_link" # link to project site of the replication (url_r)
       # , "es_original", "es_replication"
       , "result", "ref_original", "ref_replication"
     )]
