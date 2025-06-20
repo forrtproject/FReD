@@ -9,9 +9,9 @@ This version history contains noteworthy changes. For a full history of changes,
 
 ## Enhancements
 - Further expansion of the dataset
-- The package automatically draws on the most recent data, but has an offline mode (`use_FReD_offline()`) that works with a data version included in the package.
+- The package now defaults to using offline data to speed up the apps, but prompts users to update data on package load after 30 days if a new release is available. To always use the latest data, run `use_FReD_offline(FALSE)`.
 
 ## Bug Fixes
 - Change user defaults from options to environment variables, so that they are respected in background apps.
-- Effect size conversions now retain the sign of the original effect size (and introduce it for ORs)
+- Effect size conversions now retain the sign of the original effect size (and introduce it for odds ratios)
 
