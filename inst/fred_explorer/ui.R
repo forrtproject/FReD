@@ -196,6 +196,8 @@ about_content <- nav_panel(
   "))
 )
 
+replicationhub_link <- nav_item(a("FORRT Replication Hub", href = "https://www.forrt.org/replication-hub/", target = "_blank"))
+
 # Construct the page_navbar UI
 ui <- tagList(
   shinyjs::useShinyjs(),
@@ -252,6 +254,7 @@ ui <- tagList(
     references_content,
     faq_content,
     about_content,
+    replicationhub_link,
     nav_item(input_dark_mode(), class = "dark-mode-nav")
   )
 )

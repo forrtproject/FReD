@@ -108,6 +108,8 @@ about_content <- nav_panel("About",
                                "))
 )
 
+replicationhub_link <- nav_item(a("FORRT Replication Hub", href = "https://www.forrt.org/replication-hub/", target = "_blank"))
+
 ui <- tagList(
   tags$head(
     tags$style(HTML("
@@ -141,6 +143,7 @@ ui <- tagList(
     study_selection_content,
     report_content,
     about_content,
+    replicationhub_link,
     nav_item(input_dark_mode(), class = "dark-mode-nav")
   )
 )
