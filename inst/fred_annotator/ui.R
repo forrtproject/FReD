@@ -9,7 +9,7 @@ sidebar_contents <- sidebar(
   textAreaInput("references", "Paste references with DOIs", placeholder = "Paste references here...", width = '95%', height = '200px'),
   fileInput("upload", HTML('Or upload reference list (PDF, citation or text file). Must contain DOIs; otherwise process it with <a href="https://apps.crossref.org/SimpleTextQuery" target = "_blank">Crossref</a> first. Copying references from PDF generally works better than PDF upload. Linebreaks within DOIs prevent DOI recognition - preprocessing via an LLM is recommended.'), accept = c("application/pdf", " text/plain", ".bib", ".ris")),
   uiOutput("button_area"),
-  checkboxInput("validated", "Use validated database entries only", value = FALSE),
+  checkboxInput("validated", "Use validated database entries only", value = TRUE),
   actionButton("load_retractions", "Load Retraction Database", icon = icon("database")),
   hr(),
   radioButtons("success_criterion",

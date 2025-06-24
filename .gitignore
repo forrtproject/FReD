@@ -8,3 +8,9 @@ rsconnect/
 inst/doc
 docs
 /man
+# But don't ignore the 'figures' subdirectory so that we can track the logo
+!/man/figures/
+# Now, ignore all files within the /man/figures/ directory
+/man/figures/*
+# But unignore the logo
+!/man/figures/logo.png
