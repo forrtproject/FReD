@@ -221,10 +221,10 @@ ui <- tagList(
     ")))
   ),
   tags$script(HTML("
+      var tabsWithoutSidebar = ['Dataset', 'References-Checker [alpha]', 'References', 'FAQ', 'About'];
+      var tabsWithWarning = ['Dataset', 'References-Checker [alpha]', 'References'];
       $(document).on('shiny:inputchanged', function(event) {
         if (event.name === 'navbar') {
-          var tabsWithoutSidebar = ['Dataset', 'References-Checker [alpha]', 'References', 'FAQ', 'About'];
-          var tabsWithWarning = ['Dataset', 'References-Checker [alpha]', 'References'];
           if (tabsWithoutSidebar.includes(event.value)) {
             $('#sidebar .shiny-input-container').not('#success_criterion').addClass('disabled');
             if (tabsWithWarning.includes(event.value)) {
