@@ -221,12 +221,17 @@ ui <- tagList(
     ")))
   ),
   tags$script(HTML("
+      var tabsWithoutSidebar = ['Dataset', 'References-Checker [alpha]', 'References', 'FAQ', 'About'];
+      var tabsWithWarning = ['Dataset', 'References-Checker [alpha]', 'References'];
       $(document).on('shiny:inputchanged', function(event) {
         if (event.name === 'navbar') {
-          var tabsWithoutSidebar = ['Dataset', 'References-Checker [alpha]', 'References', 'FAQ', 'About'];
           if (tabsWithoutSidebar.includes(event.value)) {
             $('#sidebar .shiny-input-container').not('#success_criterion').addClass('disabled');
-            $('#sidebar-note').show();
+            if (tabsWithWarning.includes(event.value)) {
+              $('#sidebar-note').show();
+            } else {
+              $('#sidebar-note').hide();
+            }
           } else {
             $('#sidebar .shiny-input-container').removeClass('disabled');
             $('#sidebar-note').hide();
