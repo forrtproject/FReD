@@ -10,6 +10,7 @@
 #' - `RETRACTIONWATCH_DATA_FILE`: The path to the RetractionWatch database, if you have downloaded it already (or want it to be saved to a particular location). If the file exists, it will be used - otherwise, the file will be downloaded and saved there.
 #' - `RETRACTIONWATCH_URL`: The URL to download the RetractionWatch database. Needs to return the .csv file.
 #' - `FRED_OFFLINE`: Should FReD work offline (TRUE) or online (FALSE). If TRUE, FReD will not download the latest data every time it is loaded. Defaults to FALSE.
+#' - `FRED_SUPPRESS_STARTUP_MENU`: Should the interactive menu checking for data updates be suppressed (TRUE) or shown (FALSE). If TRUE, all startup messages and interactive prompts related to offline data updates will be suppressed. Defaults to FALSE.
 #'
 #' @examples
 #' ## Not run:
@@ -44,8 +45,9 @@ NULL
 .onAttach <- function(libname, pkgname) {
 
   is_offline <- isTRUE(as.logical(Sys.getenv("FRED_OFFLINE", "FALSE")))
+  suppress_menu <- isTRUE(as.logical(Sys.getenv("FRED_SUPPRESS_STARTUP_MENU", "FALSE")))
 
-  if (is_offline && interactive()) {
+  if (is_offline && interactive() && !suppress_menu) {
     tryCatch({
       local_date <- return_inbuilt("data_date")
 
@@ -72,10 +74,10 @@ NULL
           )
 
           if (choice == 1) {
-            message("Updating offline data...")
+            packageStartupMessage("Updating offline data...")
             tryCatch({
               update_offline_data()
-              message("Offline data updated successfully.")
+              packageStartupMessage("Offline data updated successfully.")
             }, error = function(e) {
               warning("An error occurred during the update: ", e$message)
             })

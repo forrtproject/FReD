@@ -57,6 +57,20 @@ test_that("convert_effect_sizes converts z-scores with N", {
   expect_equal(result, expected_r, tolerance = 1e-6)
 })
 
+test_that("convert_effect_sizes converts chi-square(1, N) to r", {
+  es_values <- c("x2(1, N = 12) = 5", "X2(1,N=50)=3.84", "χ2(1, N = 30) = 4")
+  es_types <- c("test statistic", "test statistic")
+
+  expected_r <- c(
+    sqrt(5 / 12),
+    sqrt(3.84 / 50),
+    sqrt(4 / 30)
+  )
+
+  result <- convert_effect_sizes(es_values, es_types)
+  expect_equal(result, expected_r, tolerance = 1e-6)
+})
+
 
 test_that("convert_effect_sizes correctly returns r for types 'r' and 'phi'", {
   es_values <- c("0.5", "-0.7")
@@ -150,6 +164,7 @@ test_that("convert_effect_sizes works for all supported effect sizes", {
     "t(10) = 2.5",     # test statistic: t-test
     "F(1, 20) = 4.5",   # test statistic: F-test (df1 == 1)
     "z = 2.81, N = 34",  # test statistic: z-test
+    "χ2(1, N = 12) = 5", # test statistic: chi-square with df1 == 1
     NA,
     2,
     1
@@ -164,6 +179,7 @@ test_that("convert_effect_sizes works for all supported effect sizes", {
     "odds ratio",
     "etasq",
     "f",
+    "test statistic",
     "test statistic",
     "test statistic",
     "test statistic",
@@ -184,6 +200,7 @@ test_that("convert_effect_sizes works for all supported effect sizes", {
     2.5 / sqrt(2.5^2 + 10),               # t-test
     { t_val <- sqrt(4.5); t_val / sqrt(t_val^2 + 20) },         # F-test
     2.81 / sqrt(2.81^2 + 34),              # z-test
+    sqrt(5 / 12),                          # chi-square test with df1 == 1
     NA,
     NA,
     NA
