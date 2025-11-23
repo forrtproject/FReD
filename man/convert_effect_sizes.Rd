@@ -20,22 +20,22 @@ Numeric vector of effect sizes in common metric (r)
 \description{
 Takes vectors of effect sizes and their types and converts them to a common metric (r).
 It also converts test statistics (e.g., \emph{t}, \emph{F} with 1 degree of freedom in the numerator,
-\emph{z} with \emph{N}, and \emph{\u03c72} with 1 degree of freedom and \emph{N}) to \emph{r}. Other test statistics cannot be
+\emph{z} with \emph{N}, and \eqn{\chi^2} with 1 degree of freedom and \emph{N}) to \emph{r}. Other test statistics cannot be
 consistently converted, so are returned as \code{NA}.
 }
 \details{
 Conversion formulas:
 \itemize{
-\item r: $r$
-\item r\u00b2: $r = \\sqrt{r2}$
-\item d / Cohen's g: $r = \\frac{d}{\\sqrt{d^2 + 4}}$
-\item odds ratio: $d = \\log(or) \\cdot \\sqrt{3} / \\pi$, then $r = \\frac{d}{\\sqrt{d^2 + 4}}$
-\item \u03b7\u00b2: $d = 2 \\cdot \\sqrt{\\frac{eta}{1 - eta}}$, then $r = \\frac{d}{\\sqrt{d^2 + 4}}$
-\item Cohen's f: $d = 2 \\cdot f$, then $r = \\frac{d}{\\sqrt{d^2 + 4}}$
-\item t(df): $r = \\frac{t}{\\sqrt{t^2 + df}}$
-\item F(1, df2): convert to t via $t = \\sqrt{F}$, then $r = \\frac{t}{\\sqrt{t^2 + df2}}$
-\item z with N: $r = \\frac{z}{\\sqrt{z^2 + N}}$
-\item \u03c72(1, N): $r = \\sqrt{\\frac{\u03c72}{N}}$
+\item r: \eqn{r}
+\item r^2: \eqn{r = \sqrt{r^2}}
+\item d / Cohen's g: \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}
+\item odds ratio: \eqn{d = \log(\mathrm{OR}) \cdot \sqrt{3} / \pi}, then \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}
+\item eta^2: \eqn{d = 2 \cdot \sqrt{\frac{\eta}{1 - \eta}}}, then \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}
+\item Cohen's f: \eqn{d = 2 \cdot f}, then \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}
+\item t(df): \eqn{r = \frac{t}{\sqrt{t^2 + df}}}
+\item F(1, df2): convert to t via \eqn{t = \sqrt{F}}, then \eqn{r = \frac{t}{\sqrt{t^2 + df2}}}
+\item z with N: \eqn{r = \frac{z}{\sqrt{z^2 + N}}}
+\item \eqn{\chi^2}(1, N): \eqn{r = \sqrt{\frac{\chi^2}{N}}}
 }
 
 Accepted test statistic formats (case-insensitive, with optional spaces):
@@ -43,12 +43,12 @@ Accepted test statistic formats (case-insensitive, with optional spaces):
 \item \code{t(10) = 2.5}
 \item \code{F(1, 20) = 4.5} (only where the first df is 1)
 \item \verb{z = 2.81, N = 34}
-\item \code{x2(1, N = 12) = 5} (only where the first df is 1)
+\item \code{χ2(1, N = 12) = 5} or \code{x2(1, N = 12) = 5} (only where the first df is 1)
 }
 }
 \examples{
 convert_effect_sizes(
-  c("t(10) = 2.5", "F(1, 20) = 4.5", "z = 2.81, N = 34", "x2(1, N = 12) = 5"),
+  c("t(10) = 2.5", "F(1, 20) = 4.5", "z = 2.81, N = 34", "χ2(1, N = 12) = 5"),
   rep("test statistic", 4)
 )
 }

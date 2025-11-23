@@ -16,6 +16,7 @@ The following environment variables can be set (before loading the package):
 \item \code{RETRACTIONWATCH_DATA_FILE}: The path to the RetractionWatch database, if you have downloaded it already (or want it to be saved to a particular location). If the file exists, it will be used - otherwise, the file will be downloaded and saved there.
 \item \code{RETRACTIONWATCH_URL}: The URL to download the RetractionWatch database. Needs to return the .csv file.
 \item \code{FRED_OFFLINE}: Should FReD work offline (TRUE) or online (FALSE). If TRUE, FReD will not download the latest data every time it is loaded. Defaults to FALSE.
+\item \code{FRED_SUPPRESS_STARTUP_MENU}: Should the interactive menu checking for data updates be suppressed (TRUE) or shown (FALSE). If TRUE, all startup messages and interactive prompts related to offline data updates will be suppressed. Defaults to FALSE.
 }
 }
 \examples{
