@@ -129,7 +129,8 @@ convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
         # z = value, N = value
         z_match <- grepl("^z\\s*=\\s*-?\\d+\\.?\\d*\\s*,\\s*n\\s*=\\s*\\d+$", x, ignore.case = TRUE)
         # x2/χ2(1, N = value) = value
-        chi_match <- grepl("^[x\u03c72]\\(\\s*1\\s*,\\s*n\\s*=\\s*\\d+\\s*\\)\\s*=\\s*\\d+\\.?\\d*$", x, ignore.case = TRUE)
+        chi_candidate <- gsub("^[\u03c7\u03a7]", "x", x, perl = TRUE)
+        chi_match <- grepl("^x2\\(\\s*1\\s*,\\s*n\\s*=\\s*\\d+\\s*\\)\\s*=\\s*\\d+\\.?\\d*$", chi_candidate, ignore.case = TRUE)
 
         if (t_match) {
           # Extract df and t-value
@@ -156,8 +157,8 @@ convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
           return(zval / sqrt(zval^2 + nval)) # Convert z to r
         } else if (chi_match) {
           # Extract chi-square value and N
-          nval <- as_numeric_verbose(sub(".*[x\u03c72]\\(\\s*1\\s*,\\s*n\\s*=\\s*(\\d+)\\s*\\).*", "\\1", x, ignore.case = TRUE), quiet = quiet)
-          chi_val <- as_numeric_verbose(sub(".*=\\s*(\\d+\\.?\\d*).*", "\\1", x, ignore.case = TRUE), quiet = quiet)
+          nval <- as_numeric_verbose(sub(".*x2\\(\\s*1\\s*,\\s*n\\s*=\\s*(\\d+)\\s*\\).*", "\\1", chi_candidate, ignore.case = TRUE), quiet = quiet)
+          chi_val <- as_numeric_verbose(sub(".*=\\s*(\\d+\\.?\\d*).*", "\\1", chi_candidate, ignore.case = TRUE), quiet = quiet)
           return(sqrt(chi_val / nval)) # Convert chi-square(1) to r
         } else {
           return(NA) # Not a valid test statistic format

@@ -59,7 +59,7 @@ test_that("convert_effect_sizes converts z-scores with N", {
 
 test_that("convert_effect_sizes converts chi-square(1, N) to r", {
   es_values <- c("x2(1, N = 12) = 5", "X2(1,N=50)=3.84", "χ2(1, N = 30) = 4")
-  es_types <- c("test statistic", "test statistic")
+  es_types <- rep("test statistic", length(es_values))
 
   expected_r <- c(
     sqrt(5 / 12),
