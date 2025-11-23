@@ -1,8 +1,27 @@
 #' Convert effect sizes to common metric (r)
 #'
 #' Takes vectors of effect sizes and their types and converts them to a common metric (r).
-#' It also converts test statistics, specifically *t* and *F* with 1 degree of in the numerator, to *r*.
-#' Other test statistics cannot be consistently converted, so are returned as `NA`.
+#' It also converts test statistics (e.g., *t*, *F* with 1 degree of freedom in the numerator,
+#' *z* with *N*, and *\u03c72* with 1 degree of freedom and *N*) to *r*. Other test statistics cannot be
+#' consistently converted, so are returned as `NA`.
+#'
+#' Conversion formulas:
+#' - r: $r$
+#' - r\u00b2: $r = \\sqrt{r2}$
+#' - d / Cohen's g: $r = \\frac{d}{\\sqrt{d^2 + 4}}$
+#' - odds ratio: $d = \\log(or) \\cdot \\sqrt{3} / \\pi$, then $r = \\frac{d}{\\sqrt{d^2 + 4}}$
+#' - \u03b7\u00b2: $d = 2 \\cdot \\sqrt{\\frac{eta}{1 - eta}}$, then $r = \\frac{d}{\\sqrt{d^2 + 4}}$
+#' - Cohen's f: $d = 2 \\cdot f$, then $r = \\frac{d}{\\sqrt{d^2 + 4}}$
+#' - t(df): $r = \\frac{t}{\\sqrt{t^2 + df}}$
+#' - F(1, df2): convert to t via $t = \\sqrt{F}$, then $r = \\frac{t}{\\sqrt{t^2 + df2}}$
+#' - z with N: $r = \\frac{z}{\\sqrt{z^2 + N}}$
+#' - \u03c72(1, N): $r = \\sqrt{\\frac{\u03c72}{N}}$
+#'
+#' Accepted test statistic formats (case-insensitive, with optional spaces):
+#' - `t(10) = 2.5`
+#' - `F(1, 20) = 4.5` (only where the first df is 1)
+#' - `z = 2.81, N = 34`
+#' - `x2(1, N = 12) = 5` (only where the first df is 1)
 #'
 #' @param es_values Numeric vector of effect sizes
 #' @param es_types Character vector of effect size types (types/wordings that are not supported are flagged in warning)
@@ -10,6 +29,11 @@
 #' and status messages be suppressed?
 #' @return Numeric vector of effect sizes in common metric (r)
 #' @export
+#' @examples
+#' convert_effect_sizes(
+#'   c("t(10) = 2.5", "F(1, 20) = 4.5", "z = 2.81, N = 34", "x2(1, N = 12) = 5"),
+#'   rep("test statistic", 4)
+#' )
 
 convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
   es_types <- tolower(es_types)
@@ -75,9 +99,6 @@ convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
     } else if (estype == "r2") {
       # Convert r² to r
       es_values_r[idx] <- sqrt(as_numeric_verbose(es_values[idx], quiet = quiet))
-    }else if (estype == "r2") {
-      # Convert r² to r
-      es_values_r[idx] <- sqrt(as_numeric_verbose(es_values[idx], quiet = quiet))
     } else if (estype == "d") {
       ds <- as_numeric_verbose(es_values[idx], quiet = quiet)
       es_values_r[idx] <- ds / sqrt(ds^2 + 4)
@@ -107,6 +128,8 @@ convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
         f_match <- grepl("^f\\(\\d+\\s*,\\s*\\d+\\)\\s*=\\s*\\d+\\.?\\d*$", x, ignore.case = TRUE)
         # z = value, N = value
         z_match <- grepl("^z\\s*=\\s*-?\\d+\\.?\\d*\\s*,\\s*n\\s*=\\s*\\d+$", x, ignore.case = TRUE)
+        # x2(1, N = value) = value
+        chi_match <- grepl("^x2\\(\\s*1\\s*,\\s*n\\s*=\\s*\\d+\\s*\\)\\s*=\\s*\\d+\\.?\\d*$", x, ignore.case = TRUE)
 
         if (t_match) {
           # Extract df and t-value
@@ -131,6 +154,11 @@ convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
           zval <- as_numeric_verbose(sub(".*z\\s*=\\s*(-?\\d+\\.?\\d*).*", "\\1", x, ignore.case = TRUE), quiet = quiet)
           nval <- as_numeric_verbose(sub(".*n\\s*=\\s*(\\d+).*", "\\1", x, ignore.case = TRUE), quiet = quiet)
           return(zval / sqrt(zval^2 + nval)) # Convert z to r
+        } else if (chi_match) {
+          # Extract chi-square value and N
+          nval <- as_numeric_verbose(sub(".*x2\\(\\s*1\\s*,\\s*n\\s*=\\s*(\\d+)\\s*\\).*", "\\1", x, ignore.case = TRUE), quiet = quiet)
+          chi_val <- as_numeric_verbose(sub(".*=\\s*(\\d+\\.?\\d*).*", "\\1", x, ignore.case = TRUE), quiet = quiet)
+          return(sqrt(chi_val / nval)) # Convert chi-square(1) to r
         } else {
           return(NA) # Not a valid test statistic format
         }

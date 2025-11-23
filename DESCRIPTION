@@ -1,6 +1,6 @@
 Package: FReD
 Title: Interfaces to the FORRT Replication Database
-Version: 0.0.0.9001
+Version: 0.0.0.9002
 Authors@R: c(
     person("Lukas", "Röseler", , "lukas.roeseler@uni-muenster.de", role = "aut",
            comment = c(ORCID = "0000-0002-6446-1901")),
@@ -45,7 +45,7 @@ Remotes:
     github::forrtproject/FReD
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: http://forrt.org/FReD/
