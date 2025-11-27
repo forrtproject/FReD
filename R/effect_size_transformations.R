@@ -51,8 +51,7 @@
 #'
 #' \subsection{Test Statistics}{
 #'
-#' When \code{es_types} is \code{"test statistic"}, \code{"test statistics"},
-#' or \code{"test"}, the function parses APA-formatted strings in \code{es_values}.
+#' When \code{es_types} is \code{"test statistic"} the function parses APA-formatted strings in \code{es_values}.
 #'
 #' \describe{
 #'   \item{t-test}{
