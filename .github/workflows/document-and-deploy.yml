@@ -47,6 +47,24 @@ jobs:
           git commit -m 'Documentation' || echo "No changes to commit"
           git push origin || echo "No changes to commit"
 
+      - name: Create pkgdown
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          R -e "
+            if (!require(FReD)) remotes::install_local(force = TRUE);
+            options(pkgdown.internet = TRUE);
+            pkgdown::build_site_github_pages(new_process = FALSE)
+          "
+
+      - name: Deploy to GitHub pages 🚀
+        if: ${{ github.ref_name }} == 'main'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          clean: true
+          branch: gh-pages
+          folder: docs
+
       - name: Deploy to Shiny
         env:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -65,21 +83,3 @@ jobs:
               rsconnect::deployApp(appName = 'fred_explorer_release', appDir = './inst/fred_explorer', forceUpdate = TRUE);
               rsconnect::deployApp(appName = 'fred_annotator_release', appDir = './inst/fred_annotator', forceUpdate = TRUE);
           "
-
-      - name: Create pkgdown
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          R -e "
-            if (!require(FReD)) remotes::install_local(force = TRUE);
-            options(pkgdown.internet = TRUE);
-            pkgdown::build_site_github_pages(new_process = FALSE)
-          "
-
-      - name: Deploy to GitHub pages 🚀
-        if: ${{ github.ref_name }} == 'main'
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          clean: true
-          branch: gh-pages
-          folder: docs
