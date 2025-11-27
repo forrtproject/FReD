@@ -25,7 +25,7 @@
   : Coerce specified variables to numeric and identify problematic
   values
 - [`convert_effect_sizes()`](http://forrt.org/FReD/reference/convert_effect_sizes.md)
-  : Convert effect sizes to common metric (r)
+  : Convert effect sizes to a common metric (Pearson's r)
 - [`create_citation()`](http://forrt.org/FReD/reference/create_citation.md)
   : Create FReD dataset citation
 - [`get_dataset_changelog()`](http://forrt.org/FReD/reference/get_dataset_changelog.md)
