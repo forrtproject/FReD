@@ -1,39 +1,108 @@
-#' Convert effect sizes to common metric (r)
+#' Convert effect sizes to a common metric (Pearson's r)
 #'
-#' Takes vectors of effect sizes and their types and converts them to a common metric (r).
-#' It also converts test statistics (e.g., *t*, *F* with 1 degree of freedom in the numerator,
-#' *z* with *N*, and \eqn{\chi^2} with 1 degree of freedom and *N*) to *r*. Other test statistics cannot be
-#' consistently converted, so are returned as `NA`.
+#' @description
+#' Converts a variety of effect sizes and test statistics to Pearson's r for
+#' comparability. Effect sizes that cannot be meaningfully converted are
+#' returned as \code{NA} with appropriate warnings.
 #'
-#' Conversion formulas:
-#' - r: \eqn{r}
-#' - r^2: \eqn{r = \sqrt{r^2}}
-#' - d / Cohen's g: \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}
-#' - odds ratio: \eqn{d = \log(\mathrm{OR}) \cdot \sqrt{3} / \pi}, then \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}
-#' - eta^2: \eqn{d = 2 \cdot \sqrt{\frac{\eta}{1 - \eta}}}, then \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}
-#' - Cohen's f: \eqn{d = 2 \cdot f}, then \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}
-#' - t(df): \eqn{r = \frac{t}{\sqrt{t^2 + df}}}
-#' - F(1, df2): convert to t via \eqn{t = \sqrt{F}}, then \eqn{r = \frac{t}{\sqrt{t^2 + df2}}}
-#' - z with N: \eqn{r = \frac{z}{\sqrt{z^2 + N}}}
-#' - \eqn{\chi^2}(1, N): \eqn{r = \sqrt{\frac{\chi^2}{N}}}
+#' @details
+#' \subsection{Supported Effect Sizes}{
 #'
-#' Accepted test statistic formats (case-insensitive, with optional spaces):
-#' - `t(10) = 2.5`
-#' - `F(1, 20) = 4.5` (only where the first df is 1)
-#' - `z = 2.81, N = 34`
-#' - `χ2(1, N = 12) = 5` or `x2(1, N = 12) = 5` (only where the first df is 1)
+#' The following effect sizes can be converted to r. Accepted \code{es_types}
+#' values are case-insensitive.
 #'
-#' @param es_values Numeric vector of effect sizes
-#' @param es_types Character vector of effect size types (types/wordings that are not supported are flagged in warning)
-#' @param quiet Logical. Should dataset warnings (unknown effect sizes and values not convertible to numeric)
-#' and status messages be suppressed?
-#' @return Numeric vector of effect sizes in common metric (r)
+#' \describe{
+#'   \item{Pearson's r / phi}{
+#'     \code{"r"}, \code{"phi"}, \code{"φ"} \cr
+#'     \strong{Conversion:} Returned as-is. \cr
+#'     \strong{Sign:} Preserved.
+#'   }
+#'   \item{R-squared}{
+#'     \code{"r2"}, \code{"r^2"}, \code{"r²"}, \code{"r-square"} \cr
+#'     \strong{Conversion:} \eqn{r = \sqrt{R^2}}{r = sqrt(R²)} \cr
+#'     \strong{Sign:} Always positive (R² is non-directional).
+#'   }
+#'   \item{Cohen's d / Hedges' g}{
+#'     \code{"d"}, \code{"cohen's d"}, \code{"hedges' g"}, \code{"smd"} \cr
+#'     \strong{Conversion:} \eqn{r = \frac{d}{\sqrt{d^2 + 4}}}{r = d / sqrt(d² + 4)} \cr
+#'     \strong{Sign:} Preserved (if input d is negative, r is negative).
+#'   }
+#'   \item{Odds ratio}{
+#'     \code{"or"}, \code{"odds ratio"} \cr
+#'     \strong{Conversion:} \eqn{d = \ln(OR) \cdot \sqrt{3} / \pi}{d = ln(OR) * sqrt(3) / π},
+#'     then d to r. \cr
+#'     \strong{Sign:} Preserved (OR < 1 implies negative r).
+#'   }
+#'   \item{Eta-squared}{
+#'     \code{"etasq"}, \code{"eta^2"}, \code{"η²"} \cr
+#'     \strong{Conversion:} \eqn{d = 2\sqrt{\frac{\eta^2}{1 - \eta^2}}}{d = 2 * sqrt(η² / (1 - η²))},
+#'     then d to r. \cr
+#'     \strong{Sign:} Always positive.
+#'   }
+#'   \item{Cohen's f / f²}{
+#'     \code{"f"}, \code{"cohen's f"}, \code{"f2"}, \code{"f^2"}, \code{"f²"} \cr
+#'     \strong{Conversion (f):} \eqn{d = 2f}{d = 2f}, then d to r. \cr
+#'     \strong{Conversion (f²):} \eqn{R^2 = \frac{f^2}{1 + f^2}}{R² = f² / (1 + f²)},
+#'     then \eqn{r = \sqrt{R^2}}{r = sqrt(R²)}. \cr
+#'     \strong{Sign:} Always positive.
+#'   }
+#' }
+#' }
+#'
+#' \subsection{Test Statistics}{
+#'
+#' When \code{es_types} is \code{"test statistic"}, \code{"test statistics"},
+#' or \code{"test"}, the function parses APA-formatted strings in \code{es_values}.
+#'
+#' \describe{
+#'   \item{t-test}{
+#'     \strong{Format:} \code{"t(df) = value"} \cr
+#'     \strong{Conversion:} \eqn{r = \frac{t}{\sqrt{t^2 + df}}}{r = t / sqrt(t² + df)} \cr
+#'     \strong{Sign:} Preserved.
+#'   }
+#'   \item{F-test}{
+#'     \strong{Format:} \code{"F(df1, df2) = value"} \cr
+#'     \strong{Constraint:} df1 must equal 1. \cr
+#'     \strong{Conversion:} \eqn{t = \sqrt{F}}{t = sqrt(F)}, then t to r. \cr
+#'     \strong{Sign:} Always positive.
+#'   }
+#'   \item{z-test}{
+#'     \strong{Format:} \code{"z = value, N = value"} \cr
+#'     \strong{Conversion:} \eqn{r = \frac{z}{\sqrt{z^2 + N}}}{r = z / sqrt(z² + N)} \cr
+#'     \strong{Sign:} Preserved.
+#'   }
+#'   \item{Chi-squared}{
+#'     \strong{Format:} \code{"x2(1, N = value) = value"} \cr
+#'     \strong{Constraint:} df must equal 1. \cr
+#'     \strong{Conversion:} \eqn{r = \sqrt{\frac{\chi^2}{N}}}{r = sqrt(χ² / N)} \cr
+#'     \strong{Sign:} Always positive.
+#'   }
+#' }
+#' }
+#'
+#' \subsection{Non-Convertible Effect Sizes}{
+#' The following effect sizes cannot be reliably converted to r and return
+#' \code{NA}: partial eta-squared, Cramer's V, Cohen's h, Cohen's \eqn{d_z}{dz},
+#' regression coefficients (\code{"b"}, \code{"beta"}), and semi-partial correlations.
+#' }
+#'
+#' @param es_values Numeric vector of effect sizes, or character vector for
+#'   test statistics formatted in APA style (e.g., \code{"t(10) = 2.5"}).
+#' @param es_types Character vector of effect size types (case-insensitive).
+#'   See Details for accepted values. Unrecognized types trigger a warning.
+#' @param quiet Logical. If \code{TRUE}, suppresses warnings about unknown
+#'   effect size types and messages about non-convertible or missing values.
+#'
+#' @return Numeric vector of effect sizes converted to Pearson's r. Returns
+#'   \code{NA} for values that cannot be converted or are missing.
+#'
+#' @references
+#' Sánchez-Meca, J., Marín-Martínez, F., & Chacón-Moscoso, S. (2003).
+#' Effect-size indices for dichotomized outcomes in meta-analysis.
+#' \emph{Psychological Methods}, \emph{8}(4), 448--467.
+#' \doi{10.1037/1082-989X.8.4.448}
+#'
 #' @export
-#' @examples
-#' convert_effect_sizes(
-#'   c("t(10) = 2.5", "F(1, 20) = 4.5", "z = 2.81, N = 34", "χ2(1, N = 12) = 5"),
-#'   rep("test statistic", 4)
-#' )
 
 convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
   es_types <- tolower(es_types)
@@ -47,23 +116,63 @@ convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
   # Define effect sizes that cannot be converted
   cannot_convert <- c("beta (std)", "partial etasq", "\u03C72", # χ2
                       "b (unstd)",
-                      "b", "etasq (partial)", "cohen's f^2",
+                      "b", "etasq (partial)",
                       "cramer's v", "dz", "hazards ratio", "beta", "b",
                       "percentage", "squared seminpartial correlation (sr2)",
                       "regression coefficient", "unstandardized coefficient",
                       "cohen's h", "h")
 
-  estype_map <- c(
-    "or" = "or", "odds ratio" = "or", "odds ratio (study 3)" = "or",
-    "d" = "d", "cohen's d" = "d", "hedges' g" = "d", "hedges'g" = "d",
-    "hedge's g" = "d", "hedges g" = "d", "smd" = "d",
-    "etasq" = "eta", "etaq" = "eta", "\u03B7\u00B2" = "eta", # η²
-    "f" = "f", "cohen's f" = "f", # f
-    "r" = "r", "phi" = "r", "\u03C6" = "r", # φ
-    "r2" = "r2", "r\u00B2" = "r2", "r-square" = "r2", # r²
-    "test statistic" = "test-stat", "test statistics" = "test-stat", "test" = "test-stat", # Test statistics
-    "__NA__" = "__NA__" # to handle missing effect sizes in if clauses
-  )
+estype_map <- c(
+  # Odds ratios
+  "or"              = "or",
+  "odds ratio"      = "or",
+
+  # Standardised mean differences (Cohen's d, Hedges' g)
+  "d"               = "d",
+  "cohen's d"       = "d",
+  "hedges' g"       = "d",
+  "hedges'g"        = "d",
+  "hedge's g"       = "d",
+  "hedges g"        = "d",
+  "hedgesg"         = "d",
+  "smd"             = "d",
+
+  # Eta-squared (η²)
+  "etasq"           = "eta2",
+  "etaq"            = "eta2",
+  "eta^2"           = "eta2",      
+  "\u03b7\u00b2"    = "eta2",       # η² (Unicode)
+
+  # Cohen's f
+  "f"               = "f",
+  "cohen's f"       = "f",
+
+  # Cohen's f²
+  "f2"              = "f2",
+  "f^2"             = "f2",
+  "f\u00b2"         = "f2",        # f² (Unicode)
+  "cohen's f^2"     = "f2",
+
+  # Correlations (r / phi)
+  "r"               = "r",
+  "phi"             = "r",
+  "\u03c6"          = "r",         # φ (Unicode)
+
+  # R-squared (R²)
+  "r2"              = "r2",
+  "r^2"             = "r2",
+  "r\u00b2"         = "r2",        # r² (Unicode)
+  "r-square"        = "r2",
+
+  # Test statistics bucket
+  "test statistic"  = "test-stat",
+  "test statistics" = "test-stat",
+  "test"            = "test-stat",
+
+  # Explicit NA placeholder
+  "__NA__"          = "__NA__"
+)
+
 
 
   es_values_r <- rep(NA, length(es_values))
@@ -107,14 +216,19 @@ convert_effect_sizes <- function(es_values, es_types, quiet = FALSE) {
       # per Sánchez-Meca, J., Marín-Martínez, F., & Chacón-Moscoso, S. (2003). Effect-size indices for dichotomized outcomes in meta-analysis. Psychological Methods, 8(4), 448-467.
       ds <- log(ors)*sqrt(3)/pi
       es_values_r[idx] <- ds / sqrt(ds^2 + 4)
-    } else if (estype == "eta") {
-      etas <- as_numeric_verbose(es_values[idx], quiet = quiet)
-      ds <- 2 * (sqrt(etas/(1 - etas))) # from esc package
+    } else if (estype == "eta2") {
+      eta2s <- as_numeric_verbose(es_values[idx], quiet = quiet)
+      ds <- 2 * (sqrt(eta2s/(1 - eta2s))) # from esc package
       es_values_r[idx] <-ds / sqrt(ds^2 + 4)
     } else if (estype == "f") {
       fs <- as_numeric_verbose(es_values[idx], quiet = quiet)
       ds <- 2 * fs # from esc package
       es_values_r[idx] <- ds / sqrt(ds^2 + 4)
+    } else if (estype == "f2") {
+      f2s <- as_numeric_verbose(es_values[idx], quiet = quiet)
+      # Convert f^2 to r^2, then to r
+      r2s <- f2s / (1 + f2s)
+      es_values_r[idx] <- sqrt(r2s)
     } else if (estype == "test-stat") {
       # Convert test statistics formatted in APA style to r
       vals <- es_values[idx]

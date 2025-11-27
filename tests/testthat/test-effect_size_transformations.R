@@ -72,7 +72,7 @@ test_that("convert_effect_sizes converts chi-square(1, N) to r", {
 })
 
 
-test_that("convert_effect_sizes correctly returns r for types 'r' and 'phi'", {
+test_that("convert_effect_sizes correctly returns r for 'r' and 'phi'", {
   es_values <- c("0.5", "-0.7")
   es_types <- c("r", "phi")
   result <- convert_effect_sizes(es_values, es_types)
@@ -131,6 +131,30 @@ test_that("convert_effect_sizes correctly converts f to r", {
     ds1 / sqrt((ds1^2 + 4)),
     ds2 / sqrt((ds2^2 + 4))
   ) # Matches esc::pearsons_r(f = c(.3, 1))
+  result <- convert_effect_sizes(es_values, es_types)
+  expect_equal(result, expected_r, tolerance = 1e-6)
+})
+
+test_that("convert_effect_sizes correctly converts f^2 to r", {
+  es_values <- c("0.1", "0.2")
+  es_types <- c("f^2", "f^2")
+  # Formula: r = sqrt(f^2 / (1 + f^2))
+  expected_r <- c(
+    sqrt(0.1 / (1 + 0.1)),
+    sqrt(0.2 / (1 + 0.2))
+  )
+  result <- convert_effect_sizes(es_values, es_types)
+  expect_equal(result, expected_r, tolerance = 1e-6)
+})
+
+test_that("convert_effect_sizes correctly converts cohen's f^2 aliases to r", {
+  es_values <- c("0.1", "0.15", "0.2")
+  es_types <- c("f^2", "cohen's f^2", "f2")
+  expected_r <- c(
+    sqrt(0.1 / (1 + 0.1)),
+    sqrt(0.15 / (1 + 0.15)),
+    sqrt(0.2 / (1 + 0.2))
+  )
   result <- convert_effect_sizes(es_values, es_types)
   expect_equal(result, expected_r, tolerance = 1e-6)
 })

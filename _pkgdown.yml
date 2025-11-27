@@ -2,5 +2,20 @@ url: http://forrt.org/FReD/
 template:
   bootstrap: 5
   light-switch: true
-
+  includes:
+    in_header: |
+      <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script>
+        MathJax = {
+          loader: {
+            load: ['[tex]/require']
+          },
+          tex: {
+            packages: {'[+]': ['require']},
+            inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+            displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']]
+          }
+        };
+      </script>
 
