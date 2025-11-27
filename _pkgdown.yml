@@ -9,12 +9,12 @@ template:
       <script>
         MathJax = {
           loader: {
-            load: ['[tex]/require']
+            load: ["[tex]/require"]
           },
           tex: {
-            packages: {'[+]': ['require']},
-            inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
-            displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']]
+            packages: {"[+]": ["require"]},
+            inlineMath: [["$", "$"], ["\\\\(", "\\\\)"]],
+            displayMath: [["$$", "$$"], ["\\\\[", "\\\\]"]]
           }
         };
       </script>
