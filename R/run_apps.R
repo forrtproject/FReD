@@ -143,18 +143,22 @@ run_explorer <- function(offer_install = interactive(), in_background = NULL, au
 
 #' Run the Replication Annotator
 #'
-#' Running this function will launch the FReD Replication Annotator shiny app
+#' @description
+#' `r lifecycle::badge("deprecated")`
 #'
-#' @return Replication Annotator shiny app
-#' @inheritParams run_app
+#' This function previously launched a local Shiny app but now opens the
+#' hosted web version of the FReD Annotator.
+#'
+#' @return Opens the web annotator in the default browser (invisibly returns NULL).
 #' @export
 #' @examples
 #' if (interactive()) {
-#'   # To run the Replication Annotator app:
 #'   run_annotator()
 #' }
-run_annotator <- function(offer_install = interactive(), in_background = NULL, auto_close = interactive(), port = 3839, timeout = 30) {
-  run_app(offer_install = offer_install, app = "fred_annotator", in_background = in_background, auto_close = auto_close,  port = port, timeout = timeout)
+run_annotator <- function() {
+  .Deprecated(msg = "The local annotator app has been deprecated. Opening the web version.")
+  utils::browseURL("http://forrt.org/apps/fred_annotator.html")
+  invisible(NULL)
 }
 
 #' Get the date of last modification

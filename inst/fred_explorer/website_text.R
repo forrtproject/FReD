@@ -64,10 +64,10 @@ dataset_info <- HTML(paste("<h4><b>Replication Rate</b>"
                            , "<h5><br/>There are currently "
                            , nrow(df)
                            , " replication findings entered into the database. By default, only validated and coded findings are selected. Of all findings, "
-                           , length(unique(df$ref_replication))
+                           , length(unique(df$ref_r))
                            , " are independent (i.e., use different samples/stem from different studies). Note that the following analyses treat all studies as independent. Apart from the table and bar chart, only studies for which sample sizes and effect sizes are available (for original study and replication) are considered here. The others can be viewed in the Dataset."
                            , " In total, "
-                           , length(unique(df$ref_original))
+                           , length(unique(df$ref_o))
                            , " different original studies have been replicated."
                            # , "According to the original researchers' assessments, there have been "
                            # , sum(red$pc05 == "informative failure to replicate", na.rm = TRUE)
@@ -85,7 +85,7 @@ forest_info <- HTML(paste("<h4><b>Study Overview</b>"
                           , "<h5><br/>Currently, "
                           , nrow(df)
                           , " replication findings are entered into the database. These stem from "
-                          , length(unique(df$ref_original))
+                          , length(unique(df$ref_o))
                           , " independent original studies. This is an overview of these studies."
                           , "<br/><br/><h6>"
                           , sep = ""))

@@ -6,8 +6,8 @@
 \usage{
 align_effect_direction(
   fred_data,
-  es_original = "es_original",
-  es_replication = "es_replication"
+  es_original = "es_o",
+  es_replication = "es_r"
 )
 }
 \arguments{

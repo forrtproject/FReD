@@ -128,24 +128,24 @@ assess_replication_outcome(es_o = .5, n_o = 30, es_r = .2, n_r = 100,
 To compare the different criteria, we plot the aggregate outcomes based on the FReD dataset. For this, we ignore studies that have not been coded.
 
 ```{r fig.width = 12, fig.height = 6, warning=FALSE, message=FALSE}
-df <- load_fred_data() %>% 
-  filter(!is.na(es_replication) & !is.na(es_original)) 
+df <- load_fred_data() %>%
+  filter(!is.na(es_r) & !is.na(es_o))
 
 criteria <- tribble(
-  ~criterion,                  ~name,                             
-   "significance_r",            "Significance\n(replication)",               
-   "significance_agg",          "Significance\n(aggregated)",             
-   "consistency_ci",            "Consistency\n(confidence interval)", 
-   "consistency_pi",            "Consistency\n(prediction interval)",   
-   "homogeneity",               "Homogeneity",                    
+  ~criterion,                  ~name,
+   "significance_r",            "Significance\n(replication)",
+   "significance_agg",          "Significance\n(aggregated)",
+   "consistency_ci",            "Consistency\n(confidence interval)",
+   "consistency_pi",            "Consistency\n(prediction interval)",
+   "homogeneity",               "Homogeneity",
    "homogeneity_significance",  "Homogeneity +\nSignificance",
    "small_telescopes",          "Small Telescopes"
 )
 
 results <- lapply(criteria$criterion, function(criterion) {
-  df %>% 
-    mutate(assess_replication_outcome(es_original, n_original, es_replication, n_replication, criterion = criterion)) %>% 
-    count(outcome, outcome_detailed) %>% 
+  df %>%
+    mutate(assess_replication_outcome(es_o, n_o, es_r, n_r, criterion = criterion)) %>%
+    count(outcome, outcome_detailed) %>%
     mutate(criterion = criterion)
 })
 

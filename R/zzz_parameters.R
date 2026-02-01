@@ -9,7 +9,7 @@
 #' - `FRED_DATA_FILE`: The path to the .xlsx file, if you have downloaded it already (or want it to be saved to a particular location). If the file exists, it will be used - otherwise, the file will be downloaded and saved there.
 #' - `RETRACTIONWATCH_DATA_FILE`: The path to the RetractionWatch database, if you have downloaded it already (or want it to be saved to a particular location). If the file exists, it will be used - otherwise, the file will be downloaded and saved there.
 #' - `RETRACTIONWATCH_URL`: The URL to download the RetractionWatch database. Needs to return the .csv file.
-#' - `FRED_OFFLINE`: Should FReD work offline (TRUE) or online (FALSE). If TRUE, FReD will not download the latest data every time it is loaded. Defaults to FALSE.
+#' - `FRED_OFFLINE`: Should FReD work offline (TRUE) or online (FALSE). If TRUE, FReD will not download the latest data every time it is loaded. Defaults to TRUE.
 #' - `FRED_SUPPRESS_STARTUP_MENU`: Should the interactive menu checking for data updates be suppressed (TRUE) or shown (FALSE). If TRUE, all startup messages and interactive prompts related to offline data updates will be suppressed. Defaults to FALSE.
 #'
 #' @examples
@@ -22,7 +22,7 @@ NULL
 
 .onLoad <- function(libname, pkgname) {
   parameters <- list(
-    "FRED_DATA_URL" = "https://osf.io/z5u9b/download",
+    "FRED_DATA_URL" = "https://osf.io/2tbvd/download",
     "FRED_DATA_FILE" = tempfile(fileext = ".xlsx"),
     "RETRACTIONWATCH_DATA_FILE" = tempfile(fileext = ".csv"),
     "RETRACTIONWATCH_URL" = "https://api.labs.crossref.org/data/retractionwatch?lukas.wallrich@gmail.com",
@@ -44,7 +44,7 @@ NULL
 
 .onAttach <- function(libname, pkgname) {
 
-  is_offline <- isTRUE(as.logical(Sys.getenv("FRED_OFFLINE", "FALSE")))
+  is_offline <- isTRUE(as.logical(Sys.getenv("FRED_OFFLINE")))
   suppress_menu <- isTRUE(as.logical(Sys.getenv("FRED_SUPPRESS_STARTUP_MENU", "FALSE")))
 
   if (is_offline && interactive() && !suppress_menu) {

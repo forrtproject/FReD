@@ -8,9 +8,8 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 <!-- badges: end -->
 
 The goal of the FReD package is to provide various interfaces to the
-FORRT Replication Database. The package includes two shiny apps - the
-FReD Explorer and the FReD Annotator - as well as functions to directly
-access and analyse the dataset.
+FORRT Replication Database. The package includes a shiny app - the
+FReD Explorer - as well as functions to directly access and analyse the dataset.
 
 ## FReD Explorer
 
@@ -25,8 +24,7 @@ The FReD Annotator allows users to annotate lists of articles (e.g. reading list
 for classes, or reference lists for draft articles) with any replication findings.
 This is intended to make it easier to use replications in teaching and research,
 and to thus ensure that claims are based on the best available evidence.
-You can access the FReD Annotator [online](https://forrt-replications.shinyapps.io/fred_annotator/) or by calling `run_annotator()` in your
-R console after you have loaded the package.
+You can access the FReD Annotator [online](https://forrt-replications.shinyapps.io/fred_annotator/).
 
 ## Installation
 
@@ -41,7 +39,6 @@ devtools::install_github("forrtproject/FReD")
 ``` r
 library(FReD)
 run_explorer()
-run_annotator()
 ```
 
 ## Accessing the data

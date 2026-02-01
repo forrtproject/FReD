@@ -40,12 +40,13 @@ jobs:
           "
 
       - name: commit
+        if: github.event_name != 'pull_request'
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git add -f man/\* NAMESPACE
-          git commit -m 'Documentation' || echo "No changes to commit"
-          git push origin || echo "No changes to commit"
+          git commit -m 'Documentation [automated]' || echo "No changes to commit"
+          git push origin HEAD:${{ github.ref_name }} || echo "No changes to commit"
 
       - name: Create pkgdown
         env:
@@ -72,7 +73,6 @@ jobs:
           R -e "
             remotes::install_github('${{ github.repository }}', ref = '${{ github.ref_name }}', force = TRUE);
             rsconnect::setAccountInfo(name='forrt-replications', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}});
-            rsconnect::deployApp(appName = 'fred_annotator', appDir = './inst/fred_annotator', forceUpdate = TRUE);
             rsconnect::deployApp(appName = 'fred_explorer', appDir = './inst/fred_explorer', forceUpdate = TRUE);
           "
 
@@ -81,5 +81,4 @@ jobs:
         run: |
           R -e "
               rsconnect::deployApp(appName = 'fred_explorer_release', appDir = './inst/fred_explorer', forceUpdate = TRUE);
-              rsconnect::deployApp(appName = 'fred_annotator_release', appDir = './inst/fred_annotator', forceUpdate = TRUE);
           "

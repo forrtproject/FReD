@@ -4,34 +4,19 @@
 \alias{run_annotator}
 \title{Run the Replication Annotator}
 \usage{
-run_annotator(
-  offer_install = interactive(),
-  in_background = NULL,
-  auto_close = interactive(),
-  port = 3839,
-  timeout = 30
-)
-}
-\arguments{
-\item{offer_install}{Should user be prompted to install required packages if they are missing?}
-
-\item{in_background}{Should the app be run in the background (i.e. not block the R console)? Default to TRUE if RStudio is used.}
-
-\item{auto_close}{Should the app be automatically ended when the browser is closed (or refreshed)?}
-
-\item{port}{The port to run the app on (can usually be left at the default value)}
-
-\item{timeout}{The timeout for waiting for the app to become available if launched in background (in seconds)}
+run_annotator()
 }
 \value{
-Replication Annotator shiny app
+Opens the web annotator in the default browser (invisibly returns NULL).
 }
 \description{
-Running this function will launch the FReD Replication Annotator shiny app
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function previously launched a local Shiny app but now opens the
+hosted web version of the FReD Annotator.
 }
 \examples{
 if (interactive()) {
-  # To run the Replication Annotator app:
   run_annotator()
 }
 }

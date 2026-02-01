@@ -350,8 +350,8 @@ as_numeric_verbose <- function(x, quiet = FALSE) {
 #' @param coalesce_values Logical. Should existing values in es_type_columns be retained?
 #' @return FReD dataset with additional columns for common effect sizes
 
-add_common_effect_sizes <- function(fred_data, es_value_columns = c("es_orig_value", "es_rep_value"),
-                                    es_type_columns = c("es_orig_estype", "es_rep_estype"), es_common_names = c("es_original", "es_replication"),
+add_common_effect_sizes <- function(fred_data, es_value_columns = c("es_value_o", "es_value_r"),
+                                    es_type_columns = c("es_type_o", "es_type_r"), es_common_names = c("es_o", "es_r"),
                                     coalesce_values = TRUE) {
   if (!all.equal(length(es_value_columns), length(es_type_columns), length(es_common_names))) {
     stop("Length of es_value_columns, es_type_columns, and es_common_names must be equal")
@@ -399,7 +399,7 @@ add_common_effect_sizes <- function(fred_data, es_value_columns = c("es_orig_val
 #' @param es_replication Character. Name of replication effect size column.
 #' @return Augmented FReD dataset with aligned effect directions.
 
-align_effect_direction <- function(fred_data, es_original = "es_original", es_replication = "es_replication") {
+align_effect_direction <- function(fred_data, es_original = "es_o", es_replication = "es_r") {
   orig_direction <- sign(fred_data[, es_original])
   fred_data[, es_original] <- abs(fred_data[, es_original])
   fred_data[, es_replication] <- fred_data[, es_replication] * orig_direction
@@ -421,16 +421,16 @@ align_effect_direction <- function(fred_data, es_original = "es_original", es_re
 #'
 #' @noRd
 #' @examples
-#' fred_data <- data.frame(es_original = c(0.3, 0.5), es_replication = c(0.4, 0.6),
-#'                         n_original = c(30, 40), n_replication = c(50, 60))
+#' fred_data <- data.frame(es_o = c(0.3, 0.5), es_r = c(0.4, 0.6),
+#'                         n_o = c(30, 40), n_r = c(50, 60))
 #' add_uncertainty(fred_data)
 
-add_uncertainty <- function(fred_data, es_value_columns = c("es_original", "es_replication"),
-                            N_columns = c("n_original", "n_replication"),
-                            vi_columns = c("vi_original", "vi_replication"),
-                            ci_lower_columns = c("ci.lower_original", "ci.lower_replication"),
-                            ci_upper_columns = c("ci.upper_original", "ci.upper_replication"),
-                            p_values = c("p_value_original", "p_value_replication")) {
+add_uncertainty <- function(fred_data, es_value_columns = c("es_o", "es_r"),
+                            N_columns = c("n_o", "n_r"),
+                            vi_columns = c("vi_o", "vi_r"),
+                            ci_lower_columns = c("ci.lower_o", "ci.lower_r"),
+                            ci_upper_columns = c("ci.upper_o", "ci.upper_r"),
+                            p_values = c("p_value_o", "p_value_r")) {
   if (!all.equal(length(es_value_columns), length(N_columns), length(vi_columns), length(ci_lower_columns), length(ci_upper_columns))) {
     stop("Length of all column character vectors must be equal")
   }
@@ -476,12 +476,12 @@ add_uncertainty <- function(fred_data, es_value_columns = c("es_original", "es_r
 #' @importFrom dplyr mutate case_when
 
 code_replication_outcomes <- function(fred_data,
-                           es_original = "es_original",
-                           p_original = "p_value_original",
-                           p_replication = "p_value_replication",
-                           ci_lower_replication = "ci.lower_replication",
-                           ci_upper_replication = "ci.upper_replication",
-                           es_replication = "es_replication") {
+                           es_original = "es_o",
+                           p_original = "p_value_o",
+                           p_replication = "p_value_r",
+                           ci_lower_replication = "ci.lower_r",
+                           ci_upper_replication = "ci.upper_r",
+                           es_replication = "es_r") {
 
   # Convert column names to symbols for dplyr evaluation
   es_original_sym <- dplyr::sym(es_original)
@@ -529,7 +529,7 @@ code_replication_outcomes <- function(fred_data,
 #' @param power_column Character. Name of target column for power.
 #' @return Augmented FReD dataset with power column.
 
-add_replication_power <- function(fred_data, es_original = "es_original", N_replication = "n_replication", power_column = "power_r") {
+add_replication_power <- function(fred_data, es_original = "es_o", N_replication = "n_r", power_column = "power_r") {
   # NA where N_replication is missing
   fred_data[, power_column] <- NA
   # Return 0 where sample_replication < 4, as pwr.r.test does not work for n < 4
@@ -587,8 +587,8 @@ p_from_r <- function(r, N) {
 #' @param vi_columns Character vector of target columns for sampling variances
 #' @return FReD dataset with additional columns for sampling variances (metafor's `vi`)
 
-add_sampling_variances <- function(fred_data, es_value_columns = c("es_original", "es_replication"),
-                                   N_columns = c("n_original", "n_replication"), vi_columns = c("vi_original", "vi_replication")) {
+add_sampling_variances <- function(fred_data, es_value_columns = c("es_o", "es_r"),
+                                   N_columns = c("n_o", "n_r"), vi_columns = c("vi_o", "vi_r")) {
   if (!all.equal(length(es_value_columns), length(N_columns))) {
     stop("Length of es_value_columns, N_columns and vi_columns must be equal")
   }
@@ -619,19 +619,19 @@ add_sampling_variances <- function(fred_data, es_value_columns = c("es_original"
 augment_for_zcurve <- function(fred_data) {
 
   # Ensure fred_data has required columns
-  if (!all(c("es_original", "n_original") %in% names(fred_data))) {
-    stop("fred_data must contain es_original and n_original columns")
+  if (!all(c("es_o", "n_o") %in% names(fred_data))) {
+    stop("fred_data must contain es_o and n_o columns")
   }
 
   # Initialize se and z as NA
   fred_data$se <- fred_data$z <- NA
 
-  valid_indices <- !(is.na(fred_data$es_original) | is.na(fred_data$n_original) | fred_data$n_original <= 3)
+  valid_indices <- !(is.na(fred_data$es_o) | is.na(fred_data$n_o) | fred_data$n_o <= 3)
 
   if (any(valid_indices)) {
     # Fisher's z transformation
-    z <- 0.5 * (log(1 + fred_data$es_original[valid_indices]) - log(1 - fred_data$es_original[valid_indices]))
-    fred_data$se[valid_indices] <- 1 / sqrt(fred_data$n_original[valid_indices] - 3)
+    z <- 0.5 * (log(1 + fred_data$es_o[valid_indices]) - log(1 - fred_data$es_o[valid_indices]))
+    fred_data$se[valid_indices] <- 1 / sqrt(fred_data$n_o[valid_indices] - 3)
     fred_data$z[valid_indices] <- z / fred_data$se[valid_indices]
   }
 

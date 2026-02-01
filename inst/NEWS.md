@@ -1,5 +1,15 @@
 This version history contains noteworthy changes. For a full history of changes, see the [commit history](https://github.com/forrtproject/FReD/commits/main/)
 
+# FReD 0.2.0
+
+## Breaking Changes
+- **New data source URL**: The package now uses a new data source with updated variable naming conventions
+- **Variable naming convention**: All variable names now use `_o` suffix for original study variables and `_r` suffix for replication study variables (e.g., `es_original` → `es_o`, `n_replication` → `n_r`, `ref_original` → `ref_o`, `doi_replication` → `doi_r`)
+- **`run_annotator()` deprecated**: The local annotator app has been removed. `run_annotator()` now opens the web version at forrt.org instead
+
+## Notes
+- If you have code that references old variable names, you will need to update it to use the new `_o`/`_r` suffixes
+
 # FReD 0.1.0
 
 ## New features
