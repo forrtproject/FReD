@@ -4,12 +4,12 @@
 \alias{load_fred_data}
 \title{Load the FReD dataset}
 \usage{
-load_fred_data(data = get_param("FRED_DATA_FILE"), verbose = TRUE)
+load_fred_data(data = get_param("FRED_DATA_FILE"), verbose = FALSE)
 }
 \arguments{
 \item{data}{Path to the FReD dataset (defaults to current FReD data on OSF), unless the package is in offline mode (\code{use_FReD_offline()})}
 
-\item{verbose}{Should detailed messages be printed that highlight data conversion issues? Defaults to TRUE. FALSE is quiet mode, and NULL prints a summary of problems.}
+\item{verbose}{Should detailed messages be printed that highlight data conversion issues? Defaults to FALSE (quiet mode). TRUE prints detailed warnings, and NULL prints a summary of problems.}
 }
 \value{
 A data frame with the processed FReD dataset

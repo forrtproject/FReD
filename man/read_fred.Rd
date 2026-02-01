@@ -7,7 +7,7 @@
 read_fred(
   data = get_param("FRED_DATA_FILE"),
   retain_es_as_character = TRUE,
-  verbose = TRUE
+  verbose = FALSE
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ read_fred(
 
 \item{retain_es_as_character}{Should effect sizes be retained as character? Defaults to TRUE, so that coded test statistics with df can be converted to common metric.}
 
-\item{verbose}{Should detailed messages be printed that highlight data conversion issues? Defaults to TRUE. FALSE is quiet mode, and NULL prints a summary of problems.}
+\item{verbose}{Should detailed messages be printed that highlight data conversion issues? Defaults to FALSE (quiet mode). TRUE prints detailed warnings, and NULL prints a summary of problems.}
 }
 \value{
 A data frame with the FReD dataset
