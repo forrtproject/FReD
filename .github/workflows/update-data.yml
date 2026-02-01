@@ -1,0 +1,96 @@
+name: Update Package Data
+
+on:
+  schedule:
+    # Run weekly on Mondays at 6:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download data and check hash
+        id: check-hash
+        run: |
+          # Download the data file
+          curl -L -o fred_data.xlsx "https://osf.io/2tbvd/download"
+
+          # Calculate hash
+          NEW_HASH=$(sha256sum fred_data.xlsx | cut -d ' ' -f 1)
+          echo "new_hash=$NEW_HASH" >> $GITHUB_OUTPUT
+
+          # Read stored hash if it exists
+          HASH_FILE="inst/extdata/snapshot/data_hash.txt"
+          if [ -f "$HASH_FILE" ]; then
+            OLD_HASH=$(cat "$HASH_FILE")
+          else
+            OLD_HASH=""
+          fi
+          echo "old_hash=$OLD_HASH" >> $GITHUB_OUTPUT
+
+          # Check if hash changed
+          if [ "$NEW_HASH" = "$OLD_HASH" ]; then
+            echo "data_changed=false" >> $GITHUB_OUTPUT
+            echo "Data unchanged (hash: $NEW_HASH)"
+          else
+            echo "data_changed=true" >> $GITHUB_OUTPUT
+            echo "Data changed! Old: $OLD_HASH, New: $NEW_HASH"
+          fi
+
+      - name: Early exit if no changes
+        if: steps.check-hash.outputs.data_changed == 'false'
+        run: echo "No data changes detected. Exiting."
+
+      - name: Set up R
+        if: steps.check-hash.outputs.data_changed == 'true'
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Set up R Dependencies
+        if: steps.check-hash.outputs.data_changed == 'true'
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::devtools, any::rsconnect
+
+      - name: Update offline data
+        if: steps.check-hash.outputs.data_changed == 'true'
+        run: |
+          R -e "
+            # Install package locally to have access to update function
+            devtools::load_all()
+
+            # Set to online mode and update all data
+            Sys.setenv(FRED_OFFLINE = 'FALSE')
+            Sys.setenv(FRED_SUPPRESS_STARTUP_MENU = 'TRUE')
+
+            # Update all offline data files
+            update_offline_data()
+          "
+
+      - name: Save new hash
+        if: steps.check-hash.outputs.data_changed == 'true'
+        run: |
+          echo "${{ steps.check-hash.outputs.new_hash }}" > inst/extdata/snapshot/data_hash.txt
+
+      - name: Commit and push changes
+        if: steps.check-hash.outputs.data_changed == 'true'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add inst/extdata/snapshot/
+          git commit -m "Update offline data [automated]" || echo "No changes to commit"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Deploy to Shiny
+        if: steps.check-hash.outputs.data_changed == 'true' && github.ref_name == 'main'
+        run: |
+          R -e "
+            rsconnect::setAccountInfo(name='forrt-replications', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})
+            rsconnect::deployApp(appName = 'fred_explorer', appDir = './inst/fred_explorer', forceUpdate = TRUE)
+          "
