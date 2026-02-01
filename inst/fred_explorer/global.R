@@ -14,14 +14,14 @@ if (!exists("create_citation")) stop("Failed to attach FReD namespace.")
 
 df <- load_fred_data()
 
-df_display <- df[, c("description", "es_original", "es_replication", "n_original", "n_replication", "osf_link", "contributors", "result", "result2", "ref_original", "ref_replication")]
-df_display$es_original <- round(df_display$es_original, 3)
-df_display$es_replication <- round(df_display$es_replication, 3)
+df_display <- df[, c("description", "es_o", "es_r", "n_o", "n_r", "osf_link", "contributors", "result", "result2", "ref_o", "ref_r")]
+df_display$es_o <- round(df_display$es_o, 3)
+df_display$es_r <- round(df_display$es_r, 3)
 
 
 dataset_variables <- load_variable_descriptions()
 
-df$ref_original <- gsub("(.{70,}?)\\s", "\\1\n", df$ref_original) # line breaks
+df$ref_o <- gsub("(.{70,}?)\\s", "\\1\n", df$ref_o) # line breaks
 
 forestplotheight <- "28000px"
 

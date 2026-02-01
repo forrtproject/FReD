@@ -6,8 +6,8 @@
 \usage{
 add_replication_power(
   fred_data,
-  es_original = "es_original",
-  N_replication = "n_replication",
+  es_original = "es_o",
+  N_replication = "n_r",
   power_column = "power_r"
 )
 }

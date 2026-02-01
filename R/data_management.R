@@ -94,37 +94,26 @@ read_fred <- function(data = get_param("FRED_DATA_FILE"), retain_es_as_character
 
   tryCatch({
 
-    red <- safe_read_xl(data, url = get_param("FRED_DATA_URL"), sheet = "Data") # .xlsx file
-    red <- red[-(1:2), ] # exclude labels and "X" column
+    # New data format: single sheet with all data
+    fred_data <- safe_read_xl(data, url = get_param("FRED_DATA_URL"), sheet = 1)
 
-    forrt  <- safe_read_xl(data, url = get_param("FRED_DATA_URL"), sheet = "FORRT R&R (editable)", startRow = 1)
-    forrt <- forrt[-(1:2), ] # exclude labels and "X" column
-    forrt <- forrt[!(forrt$doi_original %in% red$doi_original), ] # exclude forrt entries of original study that already appear in FReD (based on DOIs)
-
-    # additional studies
-    as <-  safe_read_xl(data, url = get_param("FRED_DATA_URL"), sheet = "Additional Studies to be added", startRow = 2)
-    as$id <- paste("uncoded_studies_", rownames(as), sep = "")
-    as <- as[as$`Study.listed.in.ReD?` != "1.0", ] # exclude additional studies that are already listed in the main dataset
-    as <- as[!is.na(as$doi_original), ] # exclude studies for which doi_original is unavailable because they will not be findable in the annotator anyway
-
-    numeric_variables <- c("n_original", "n_replication", "es_orig_value", "es_rep_value",
-                           "validated", "published_rep", "same_design", "same_test",
-                           "original_authors",
-                           "significant_original", "significant_replication", "power")
-
-
-    if (!retain_es_as_character) {
-      numeric_variables <- c(numeric_variables, "es_orig_RRR", "es_rep_RRR")
+    # Add id column if not present (use fred_id or row number)
+    if (!"id" %in% names(fred_data)) {
+      if ("fred_id" %in% names(fred_data)) {
+        fred_data$id <- fred_data$fred_id
+      } else {
+        fred_data$id <- seq_len(nrow(fred_data))
+      }
     }
 
+    numeric_variables <- c("n_o", "n_r", "es_value_o", "es_value_r")
 
+    # Only coerce variables that exist in the dataset
+    numeric_variables <- intersect(numeric_variables, names(fred_data))
 
-  # Assuming 'red' and 'forrt' have a unique ID column named "id"
-  red <- coerce_to_numeric(red, numeric_variables, id_var = "id", verbose = verbose)
-  forrt <- coerce_to_numeric(forrt, numeric_variables, id_var = "id", verbose = verbose)
+    fred_data <- coerce_to_numeric(fred_data, numeric_variables, id_var = "id", verbose = verbose)
 
-  # merge the data, aligning column types where one is character (as empty colums are imported as numeric)
-  return(bind_rows_with_characters(red, forrt, as))
+    return(fred_data)
 
     }, error = function(e) {
       return(return_inbuilt("data"))
@@ -149,6 +138,7 @@ coerce_to_numeric <- function(df, numeric_vars, id_var, verbose = TRUE) {
   problematic_entries <- list()
 
   for (var in numeric_vars) {
+    # Suppress "NAs introduced by coercion" warnings - we detect and report these ourselves below
     problematic_rows <- which(!is.na(df[[var]]) & is.na(suppressWarnings(as.numeric(df[[var]]))))
 
     if (length(problematic_rows) > 0) {
@@ -187,50 +177,75 @@ coerce_to_numeric <- function(df, numeric_vars, id_var, verbose = TRUE) {
 
 clean_variables <- function(fred_data) {
 
+  # Initialize columns that may not exist in new data format
+  if (!"description" %in% names(fred_data)) fred_data$description <- ""
+  if (!"tags" %in% names(fred_data)) fred_data$tags <- NA
+  if (!"contributors" %in% names(fred_data)) fred_data$contributors <- NA
+  if (!"result" %in% names(fred_data)) fred_data$result <- NA
+  if (!"notes" %in% names(fred_data)) fred_data$notes <- NA
+  if (!"exclusion" %in% names(fred_data)) fred_data$exclusion <- NA
+  if (!"validated" %in% names(fred_data)) fred_data$validated <- 1
+  if (!"osf_link" %in% names(fred_data)) {
+    fred_data$osf_link <- ifelse(!is.na(fred_data$url_r), fred_data$url_r, NA)
+  }
+  if (!"source" %in% names(fred_data)) fred_data$source <- NA
+  if (!"orig_journal" %in% names(fred_data)) {
+    fred_data$orig_journal <- if ("journal_o" %in% names(fred_data)) fred_data$journal_o else NA
+  }
+
   # recode variables for app to work
-  fred_data$pc_tags <- NA
-  fred_data$pc_contributors <- NA
   fred_data$description <- ifelse(is.na(fred_data$description), "", fred_data$description)
-  fred_data$contributors <- ifelse(is.na(fred_data$contributors), fred_data$pc_contributors, fred_data$contributors)
-  fred_data$tags <- ifelse(is.na(fred_data$tags), fred_data$pc_tags, fred_data$tags)
-  fred_data$subjects <- NA
-  fred_data$description <- ifelse(is.na(fred_data$description), fred_data$pc_title, fred_data$description)
 
   fred_data$closeness <- NA
-  fred_data$result <- ifelse(fred_data$result == "0", NA, fred_data$result)
+  fred_data$result <- ifelse(!is.na(fred_data$result) & fred_data$result == "0", NA, fred_data$result)
 
-  fred_data$result
+  # compute year the original study was published - use year_o if available, otherwise extract from ref_o
+  if ("year_o" %in% names(fred_data)) {
+    fred_data$orig_year <- as.numeric(fred_data$year_o)
+  } else {
+    fred_data$orig_year <- as.numeric(gsub(".*((18|19|20)\\d{2}).*", "\\1", fred_data$ref_o))
+  }
 
-  # compute year the original study was published (match 1800-2099 only, and require consecutive numbers)
-  fred_data$orig_year <- as.numeric(gsub(".*((18|19|20)\\d{2}).*", "\\1", fred_data$ref_original))
+  # delete duplicates and non-replication studies (only if notes column exists and has values)
+  if ("notes" %in% names(fred_data)) {
+    fred_data <- fred_data[is.na(fred_data$notes) | fred_data$notes != "duplicate", ]
+    fred_data <- fred_data[is.na(fred_data$notes) | fred_data$notes != "No actual replication conducted", ]
+  }
 
-  # # delete duplicates and non-replication studies
-  fred_data <- fred_data[fred_data$notes != "duplicate" | is.na(fred_data$notes), ] # ADDED: study exclusions due to duplicates
-  fred_data <- fred_data[fred_data$notes != "No actual replication conducted" | is.na(fred_data$notes), ] # ADDED: some registrations had no corresponding replication study
-
-  # remove entries with reasons for exclusions
-  fred_data <- fred_data[is.na(fred_data$exclusion), ]
+  # remove entries with reasons for exclusions (only if exclusion column exists)
+  if ("exclusion" %in% names(fred_data)) {
+    fred_data <- fred_data[is.na(fred_data$exclusion), ]
+  }
 
   # Collapse validated categories (# 2: error detected and corrected)
-  fred_data$validated <- ifelse(fred_data$validated == 1 | fred_data$validated == 2, 1, fred_data$validated)
-
+  if ("validated" %in% names(fred_data)) {
+    fred_data$validated <- ifelse(fred_data$validated == 1 | fred_data$validated == 2, 1, fred_data$validated)
+  }
 
   # Strip DOIs by removing everything before first 10.
-  fred_data$doi_original <- gsub("^.*?(10\\.\\d+/.*$)", "\\1", fred_data$doi_original) %>% str_trim_base()
-  fred_data$doi_replication <- gsub("^.*?(10\\.\\d+/.*$)", "\\1", fred_data$doi_replication) %>% str_trim_base()
+  if ("doi_o" %in% names(fred_data)) {
+    fred_data$doi_o <- gsub("^.*?(10\\.\\d+/.*$)", "\\1", fred_data$doi_o) %>% str_trim_base()
+  }
+  if ("doi_r" %in% names(fred_data)) {
+    fred_data$doi_r <- gsub("^.*?(10\\.\\d+/.*$)", "\\1", fred_data$doi_r) %>% str_trim_base()
+  }
 
   # Remove DOIs from references
-  fred_data$ref_original <- fred_data$ref_original %>%
-    stringr::str_remove_all("https?://(dx\\.)?doi\\.org/10\\.[^ >,]+") %>%
-    stringr::str_remove_all("doi:10\\.[^ >,]+") %>%
-    stringr::str_remove_all("10\\.[^ >,]+") %>%
-    str_trim_base()
+  if ("ref_o" %in% names(fred_data)) {
+    fred_data$ref_o <- fred_data$ref_o %>%
+      stringr::str_remove_all("https?://(dx\\.)?doi\\.org/10\\.[^ >,]+") %>%
+      stringr::str_remove_all("doi:10\\.[^ >,]+") %>%
+      stringr::str_remove_all("10\\.[^ >,]+") %>%
+      str_trim_base()
+  }
 
-  fred_data$ref_replication <- fred_data$ref_replication %>%
-    stringr::str_remove_all("https?://(dx\\.)?doi\\.org/10\\.[^ >,]+") %>%
-    stringr::str_remove_all("doi:10\\.[^ >,]+") %>%
-    stringr::str_remove_all("10\\.[^ >,]+") %>%
-    str_trim_base()
+  if ("ref_r" %in% names(fred_data)) {
+    fred_data$ref_r <- fred_data$ref_r %>%
+      stringr::str_remove_all("https?://(dx\\.)?doi\\.org/10\\.[^ >,]+") %>%
+      stringr::str_remove_all("doi:10\\.[^ >,]+") %>%
+      stringr::str_remove_all("10\\.[^ >,]+") %>%
+      str_trim_base()
+  }
 
   fred_data
 }

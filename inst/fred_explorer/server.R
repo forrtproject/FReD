@@ -67,14 +67,14 @@ server <- function(input, output, session) {
 
   # Recalculate replication success based on criterion
   assess_success <- function(result, success_criterion) {
-    assess_replication_outcome(result$es_original, result$n_original, result$es_replication, result$n_replication,
+    assess_replication_outcome(result$es_o, result$n_o, result$es_r, result$n_r,
                                criterion = success_criterion)$outcome_report
   }
 
   observeEvent({input$success_criterion; df_temp()}, {
     if (nrow(df_temp()) > 1) {
       updated_df <- df_temp() %>%
-        arrange(ref_original) %>%
+        arrange(ref_o) %>%
         filter(if (input$validated == "TRUE") validated == 1 else TRUE) %>%
         mutate(
           result = assess_success(., input$success_criterion) %>% cap_first_letter(),
@@ -115,8 +115,8 @@ server <- function(input, output, session) {
 
     df_temp_filtered <- df_temp[, c(
       "description", "tags", "osf_link" # link to project site of the replication (url_r)
-      # , "es_original", "es_replication"
-      , "result", "ref_original", "ref_replication"
+      # , "es_o", "es_r"
+      , "result", "ref_o", "ref_r"
     )]
 
     DT::datatable(
@@ -153,9 +153,9 @@ server <- function(input, output, session) {
     validate(need(nrow(df_temp) > 0, "Plot cannot be created if no studies are selected"))
 
     df_temp$scatterplotdescription <- paste(df_temp$description, "\nr(original) = ",
-      round(df_temp$es_original, 3),
+      round(df_temp$es_o, 3),
       ", r(replication) = ",
-      round(df_temp$es_replication, 3),
+      round(df_temp$es_r, 3),
       sep = ""
     )
 
@@ -164,15 +164,15 @@ server <- function(input, output, session) {
 
     s3 <- input$table_rows_selected
 
-    df_temp$significant_original <- c("Not significant", "Significant")[(df_temp$p_value_original < .05) + 1] %>%
+    df_temp$significant_original <- c("Not significant", "Significant")[(df_temp$p_value_o < .05) + 1] %>%
       factor( levels = c("Not significant", "Significant"))
-    df_temp$significant_replication <- c("Not significant", "Significant")[(df_temp$p_value_replication < .05) + 1] %>%
+    df_temp$significant_replication <- c("Not significant", "Significant")[(df_temp$p_value_r < .05) + 1] %>%
       factor(levels = c("Not significant", "Significant"))
 
     df_temp$result <- factor(df_temp$result, levels = names(outcome_colors()))
 
     scatterplot <-
-      ggplot(df_temp, aes(x = es_original, y = es_replication, text = scatterplotdescription)) +
+      ggplot(df_temp, aes(x = es_o, y = es_r, text = scatterplotdescription)) +
       geom_hline(aes(yintercept = 0), linetype = 2) +
       geom_abline(intercept = 0, slope = 1, color = "Grey60") +
       geom_point(aes(fill = result), size = pointsize, color = "Grey30", shape = 21, alpha = .8) +
@@ -215,7 +215,7 @@ server <- function(input, output, session) {
 
     df_temp <- df_temp_DT()
 
-    return(length(unique(df_temp$ref_original)) * 100)
+    return(length(unique(df_temp$ref_o)) * 100)
   })
 
   output$forestplot <- plotly::renderPlotly({
@@ -224,41 +224,41 @@ server <- function(input, output, session) {
     df_temp <- df_temp[rev(row.names(df_temp)), ]
 
     # use only studies with a replication effect size
-    df_temp <- df_temp[!is.na(df_temp$es_replication), ]
+    df_temp <- df_temp[!is.na(df_temp$es_r), ]
 
     # use only studies with a reference for the original finding
-    df_temp <- df_temp[!is.na(df_temp$ref_original), ]
+    df_temp <- df_temp[!is.na(df_temp$ref_o), ]
 
     # make descriptions shorter
     df_temp$description <- gsub("(.{70,}?)\\s", "\\1\n", df_temp$description) # line breaks
 
     # make reference shorter
-    df_temp$ref_original <- gsub("(.{70,}?)\\s", "\\1\n", df_temp$ref_original) # line breaks
+    df_temp$ref_o <- gsub("(.{70,}?)\\s", "\\1\n", df_temp$ref_o) # line breaks
 
     red_temp_selected <- df_temp
 
     xlims <- seq(from = -1, 1, .25)
 
-    df_temp$description <- factor(df_temp$description, levels = unique(df_temp$description[order(df_temp$es_replication)]))
+    df_temp$description <- factor(df_temp$description, levels = unique(df_temp$description[order(df_temp$es_r)]))
 
-    forest <- ggplot(data = df_temp, aes(x = es_replication, y = ref_original)) +
+    forest <- ggplot(data = df_temp, aes(x = es_r, y = ref_o)) +
       geom_vline(xintercept = 0, col = "dark grey", lwd = 1) +
       # Replication effect sizes
       geom_point() +
-      geom_errorbar(aes(xmin = ci.lower_replication, xmax = ci.upper_replication)) +
+      geom_errorbar(aes(xmin = ci.lower_r, xmax = ci.upper_r)) +
 
       # Original effect sizes
-      geom_point(aes(x = es_original, y = ref_original), color = "dark grey", alpha = .5) +
-      geom_errorbar(aes(xmin = ci.lower_original, xmax = ci.upper_original), color = "dark grey") +
+      geom_point(aes(x = es_o, y = ref_o), color = "dark grey", alpha = .5) +
+      geom_errorbar(aes(xmin = ci.lower_o, xmax = ci.upper_o), color = "dark grey") +
 
       # highlighted studies
-     # geom_point(data = red_temp_selected, aes(x = es_replication, y = ref_original), color = ifelse(nrow(df_temp) == nrow(red_temp_selected), "black", "df")) +
+     # geom_point(data = red_temp_selected, aes(x = es_r, y = ref_o), color = ifelse(nrow(df_temp) == nrow(red_temp_selected), "black", "df")) +
 
       # Theme and formatting
       theme_classic() +
       geom_vline(xintercept = xlims, col = rgb(0, 0, 0, .05), lwd = 0.5, lty = 1) +
       theme(text = element_text(size = 14)) +
-      xlim(c(floor(min(df_temp$ci.lower_original)), ceiling(max(df_temp$ci.upper_original, na.rm = TRUE)))) +
+      xlim(c(floor(min(df_temp$ci.lower_o)), ceiling(max(df_temp$ci.upper_o, na.rm = TRUE)))) +
       xlab("r") +
       ylab("") +
       theme(legend.position = "none") +
@@ -266,9 +266,9 @@ server <- function(input, output, session) {
       scale_y_discrete(limits = rev) +
       ggtitle(paste(
         "Blobbogram\n",
-        sum(!is.na(df_temp$es_original)),
+        sum(!is.na(df_temp$es_o)),
         "Effect sizes selected.\nGrey dots represent original effect sizes. Black dots represent replication effect sizes."
-        # , length(unique(df_temp$ref_original))
+        # , length(unique(df_temp$ref_o))
         # , "Original studies were examined in replication studies."
       ))
 
@@ -462,9 +462,9 @@ server <- function(input, output, session) {
 
   output$correlate_decade <- plotly::renderPlotly({
 
-    red_agg <- aggregate_results(df_temp_DT(), ref_original)
+    red_agg <- aggregate_results(df_temp_DT(), ref_o)
 
-    red_agg$year_orig <- as.numeric(substr(gsub("\\D", "", red_agg$ref_original), 1, 4))
+    red_agg$year_orig <- as.numeric(substr(gsub("\\D", "", red_agg$ref_o), 1, 4))
 
     # Remove implausible years
     current_year <- as.numeric(format(Sys.Date(), "%Y"))
@@ -495,7 +495,7 @@ server <- function(input, output, session) {
   })
 
   output$correlate_journal <- plotly::renderPlotly({
-    red_agg <- aggregate_results(df_temp_DT(), ref_original, orig_journal)
+    red_agg <- aggregate_results(df_temp_DT(), ref_o, orig_journal)
 
 
 
@@ -540,8 +540,8 @@ server <- function(input, output, session) {
     es <- df_temp_DT()
     es$mod <- es[, input$moderator]
     es <- es[!is.na(es$mod), ]
-    es <- es[!is.na(es$ref_original), ]
-    es$se <- sqrt((1 - abs(es$es_original)^2) / (es$n_original - 2))
+    es <- es[!is.na(es$ref_o), ]
+    es$se <- sqrt((1 - abs(es$es_o)^2) / (es$n_o - 2))
     es
   })
 
@@ -549,9 +549,9 @@ server <- function(input, output, session) {
     es <- preprocessed_data()
     message("Estimate metafor")
     mod <- metafor::rma.mv(
-      yi = es_replication,
+      yi = es_r,
       V = se^2,
-      random = ~ 1 | ref_original,
+      random = ~ 1 | ref_o,
       tdist = TRUE,
       data = es,
       mods = ~ mod - 1,
@@ -568,7 +568,7 @@ server <- function(input, output, session) {
   output$flexibleplot <- plotly::renderPlotly({
     es <- preprocessed_data()
     mod <- es$mod
-    p <- ggplot2::ggplot(data = es, aes(y = es_replication, color = ref_original)) +
+    p <- ggplot2::ggplot(data = es, aes(y = es_r, color = ref_o)) +
       geom_hline(yintercept = 0, linetype = "dashed") +
       theme_bw() +
       labs(x = input$moderator, y = "Replication Effect Size (r)", color = "Reference")
@@ -576,7 +576,7 @@ server <- function(input, output, session) {
     if (is.numeric(mod)) {
       p <- p + aes(x = mod) + geom_point() + geom_smooth(aes(color = NULL), formula = y ~ x)
     } else {
-      p <- p + aes(x = fct_rev(mod)) + geom_violin(fill = NA) + geom_jitter(aes(color = ref_original), width = .1) + coord_flip()
+      p <- p + aes(x = fct_rev(mod)) + geom_violin(fill = NA) + geom_jitter(aes(color = ref_o), width = .1) + coord_flip()
     }
 
     plotly::ggplotly(p) %>% plotly::config(displayModeBar = FALSE)
@@ -615,9 +615,9 @@ server <- function(input, output, session) {
       rownames(modtable) <- substring(input$moderator, first = 4)
       modtable[, 2:6] <- round(as.data.frame(modtable)[, 2:6], digits = 2)
       modelbeta <- metafor::rma.mv(
-        yi = es_replication,
+        yi = es_r,
         V = se^2,
-        random = ~ 1 | ref_original,
+        random = ~ 1 | ref_o,
         tdist = TRUE,
         data = es,
         mods = ~mod,
@@ -664,11 +664,11 @@ server <- function(input, output, session) {
     df[is.na(df$result), "result"] <- "Not coded yet"
 
     # Check which entries  exist in the df
-    intersection <- dois[dois %in% df$doi_original]
+    intersection <- dois[dois %in% df$doi_o]
 
     # df subset
-    df_temp <- df[(tolower(df$doi_original) %in% dois), ]
-    df_temp <- df_temp[!is.na(df_temp$doi_original), ]
+    df_temp <- df[(tolower(df$doi_o) %in% dois), ]
+    df_temp <- df_temp[!is.na(df_temp$doi_o), ]
 
     bardata <- as.data.frame(base::table(df_temp$result, useNA = "always") / nrow(df_temp))
     names(bardata) <- c("Result", "Proportion")
@@ -683,7 +683,7 @@ server <- function(input, output, session) {
       xlab("") +
       coord_flip() +
       scale_fill_manual("Result", values = outcome_colors()) +
-      ggtitle(paste(nrow(df_temp), "Replication findings were identified. These stem from", length(unique(df_temp$doi_original)), "different publication(s)."))
+      ggtitle(paste(nrow(df_temp), "Replication findings were identified. These stem from", length(unique(df_temp$doi_o)), "different publication(s)."))
 
      p <- plotly::ggplotly(barchart, tooltip = "text") %>%
       plotly::config(displayModeBar = FALSE) %>%
@@ -702,14 +702,14 @@ server <- function(input, output, session) {
     df[is.na(df$result), "result"] <- "Not coded yet"
 
     # Check which entries  exist in the df
-    intersection <- dois[dois %in% df$doi_original]
+    intersection <- dois[dois %in% df$doi_o]
 
     # df subset
-    df_temp <- df[(tolower(df$doi_original) %in% dois), ]
-    df_temp <- df_temp[!is.na(df_temp$doi_original), ]
+    df_temp <- df[(tolower(df$doi_o) %in% dois), ]
+    df_temp <- df_temp[!is.na(df_temp$doi_o), ]
 
-    df_temp$original <- df_temp$ref_original # paste(df_temp$ref_original, df_temp$doi_original, sep = " ") # ADD DOIs if they are not already part of the reference
-    df_temp$replication <- df_temp$ref_replication # paste(df_temp$ref_replication, df_temp$doi_replication, sep = " ")
+    df_temp$original <- df_temp$ref_o # paste(df_temp$ref_o, df_temp$doi_o, sep = " ") # ADD DOIs if they are not already part of the reference
+    df_temp$replication <- df_temp$ref_r # paste(df_temp$ref_r, df_temp$doi_r, sep = " ")
 
     print(df_temp[, c("original", "description", "replication", "result")])
   })
@@ -728,11 +728,11 @@ server <- function(input, output, session) {
     df_temp <- df_temp()
 
 
-    # df_temp_filtered <- df_temp[, c("description", "n_original", "n_replication", "power", "result")]
-    # df_temp_filtered <- df_temp[, c("description", "tags", "contributors", "result", "ref_original", "ref_replication")]
+    # df_temp_filtered <- df_temp[, c("description", "n_o", "n_r", "power", "result")]
+    # df_temp_filtered <- df_temp[, c("description", "tags", "contributors", "result", "ref_o", "ref_r")]
 
     DT::datatable(
-      df_temp[, c("description", "tags", "result", "ref_original", "ref_replication")],
+      df_temp[, c("description", "tags", "result", "ref_o", "ref_r")],
       extensions = "Buttons",
       options = list(
         scrollX = TRUE,
@@ -775,15 +775,15 @@ server <- function(input, output, session) {
   #     df_temp <- df_temp[!is.na(df_temp$result), ]
   #
   #     # compute se
-  #     df_temp$se_original <- sqrt((1-abs(as.numeric(df_temp$es_original))^2)/(as.numeric(df_temp$n_original)-2))
-  #     df_temp$se_replication <- sqrt((1-abs(as.numeric(df_temp$es_replication))^2)/(as.numeric(df_temp$n_replication)-2))
+  #     df_temp$se_o <- sqrt((1-abs(as.numeric(df_temp$es_o))^2)/(as.numeric(df_temp$n_o)-2))
+  #     df_temp$se_r <- sqrt((1-abs(as.numeric(df_temp$es_r))^2)/(as.numeric(df_temp$n_r)-2))
   #
-  #     redlong_original <- df_temp[, c("es_original", "ref_original", "n_original", "se_original")]
+  #     redlong_original <- df_temp[, c("es_o", "ref_o", "n_o", "se_o")]
   #     redlong_original$type = "Original"
   #     names(redlong_original) <- c("es", "ref", "n", "se", "type")
   #     redlong_original <- redlong_original[!duplicated(redlong_original), ]
   #
-  #     redlong_replication <- df_temp[ , c("es_replication", "ref_replication", "n_replication", "se_replication")]
+  #     redlong_replication <- df_temp[ , c("es_r", "ref_r", "n_r", "se_r")]
   #     redlong_replication$type = "Replication"
   #     names(redlong_replication) <- c("es", "ref", "n", "se", "type")
   #
@@ -826,15 +826,15 @@ server <- function(input, output, session) {
   #     df_temp <- df_temp[!is.na(df_temp$result), ]
   #
   #     # compute se
-  #     df_temp$se_original <- sqrt((1-abs(as.numeric(df_temp$es_original))^2)/(as.numeric(df_temp$n_original)-2))
-  #     df_temp$se_replication <- sqrt((1-abs(as.numeric(df_temp$es_replication))^2)/(as.numeric(df_temp$n_replication)-2))
+  #     df_temp$se_o <- sqrt((1-abs(as.numeric(df_temp$es_o))^2)/(as.numeric(df_temp$n_o)-2))
+  #     df_temp$se_r <- sqrt((1-abs(as.numeric(df_temp$es_r))^2)/(as.numeric(df_temp$n_r)-2))
   #
-  #     redlong_original <- df_temp[, c("es_original", "ref_original", "n_original", "se_original")]
+  #     redlong_original <- df_temp[, c("es_o", "ref_o", "n_o", "se_o")]
   #     redlong_original$type = "Original"
   #     names(redlong_original) <- c("es", "ref", "n", "se", "type")
   #     redlong_original <- redlong_original[!duplicated(redlong_original), ]
   #
-  #     redlong_replication <- df_temp[ , c("es_replication", "ref_replication", "n_replication", "se_replication")]
+  #     redlong_replication <- df_temp[ , c("es_r", "ref_r", "n_r", "se_r")]
   #     redlong_replication$type = "Replication"
   #     names(redlong_replication) <- c("es", "ref", "n", "se", "type")
   #
@@ -946,15 +946,15 @@ server <- function(input, output, session) {
     df_temp <- df_temp[!is.na(df_temp$result), ]
 
     # compute se
-    df_temp$se_original <- sqrt((1 - abs(as.numeric(df_temp$es_original))^2) / (as.numeric(df_temp$n_original) - 2))
-    df_temp$se_replication <- sqrt((1 - abs(as.numeric(df_temp$es_replication))^2) / (as.numeric(df_temp$n_replication) - 2))
+    df_temp$se_o <- sqrt((1 - abs(as.numeric(df_temp$es_o))^2) / (as.numeric(df_temp$n_o) - 2))
+    df_temp$se_r <- sqrt((1 - abs(as.numeric(df_temp$es_r))^2) / (as.numeric(df_temp$n_r) - 2))
 
-    redlong_original <- df_temp[, c("es_original", "ref_original", "n_original", "se_original")]
+    redlong_original <- df_temp[, c("es_o", "ref_o", "n_o", "se_o")]
     redlong_original$type <- "Original"
     names(redlong_original) <- c("es", "ref", "n", "se", "type")
     redlong_original <- redlong_original[!duplicated(redlong_original), ]
 
-    redlong_replication <- df_temp[, c("es_replication", "ref_replication", "n_replication", "se_replication")]
+    redlong_replication <- df_temp[, c("es_r", "ref_r", "n_r", "se_r")]
     redlong_replication$type <- "Replication"
     names(redlong_replication) <- c("es", "ref", "n", "se", "type")
 
@@ -1007,15 +1007,15 @@ server <- function(input, output, session) {
     df_temp <- df_temp[!is.na(df_temp$result), ]
 
     # compute se
-    df_temp$se_original <- sqrt((1 - abs(as.numeric(df_temp$es_original))^2) / (as.numeric(df_temp$n_original) - 2))
-    df_temp$se_replication <- sqrt((1 - abs(as.numeric(df_temp$es_replication))^2) / (as.numeric(df_temp$n_replication) - 2))
+    df_temp$se_o <- sqrt((1 - abs(as.numeric(df_temp$es_o))^2) / (as.numeric(df_temp$n_o) - 2))
+    df_temp$se_r <- sqrt((1 - abs(as.numeric(df_temp$es_r))^2) / (as.numeric(df_temp$n_r) - 2))
 
-    redlong_original <- df_temp[, c("es_original", "ref_original", "n_original", "se_original")]
+    redlong_original <- df_temp[, c("es_o", "ref_o", "n_o", "se_o")]
     redlong_original$type <- "Original"
     names(redlong_original) <- c("es", "ref", "n", "se", "type")
     redlong_original <- redlong_original[!duplicated(redlong_original), ]
 
-    redlong_replication <- df_temp[, c("es_replication", "ref_replication", "n_replication", "se_replication")]
+    redlong_replication <- df_temp[, c("es_r", "ref_r", "n_r", "se_r")]
     redlong_replication$type <- "Replication"
     names(redlong_replication) <- c("es", "ref", "n", "se", "type")
 

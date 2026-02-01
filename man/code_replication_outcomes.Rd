@@ -6,12 +6,12 @@
 \usage{
 code_replication_outcomes(
   fred_data,
-  es_original = "es_original",
-  p_original = "p_value_original",
-  p_replication = "p_value_replication",
-  ci_lower_replication = "ci.lower_replication",
-  ci_upper_replication = "ci.upper_replication",
-  es_replication = "es_replication"
+  es_original = "es_o",
+  p_original = "p_value_o",
+  p_replication = "p_value_r",
+  ci_lower_replication = "ci.lower_r",
+  ci_upper_replication = "ci.upper_r",
+  es_replication = "es_r"
 )
 }
 \arguments{

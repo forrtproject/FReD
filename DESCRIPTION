@@ -1,6 +1,6 @@
 Package: FReD
 Title: Interfaces to the FORRT Replication Database
-Version: 0.0.0.9002
+Version: 0.2.0
 Authors@R: c(
     person("Lukas", "Röseler", , "lukas.roeseler@uni-muenster.de", role = "aut",
            comment = c(ORCID = "0000-0002-6446-1901")),
