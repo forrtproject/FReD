@@ -85,10 +85,10 @@ bind_rows_with_characters <- function(..., .id = NULL) {
 #'
 #' @param data Path to the FReD dataset (defaults to current FReD data on OSF), unless the package is in offline mode (`use_FReD_offline()`)
 #' @param retain_es_as_character Should effect sizes be retained as character? Defaults to TRUE, so that coded test statistics with df can be converted to common metric.
-#' @param verbose Should detailed messages be printed that highlight data conversion issues? Defaults to TRUE. FALSE is quiet mode, and NULL prints a summary of problems.
+#' @param verbose Should detailed messages be printed that highlight data conversion issues? Defaults to FALSE (quiet mode). TRUE prints detailed warnings, and NULL prints a summary of problems.
 #' @return A data frame with the FReD dataset
 
-read_fred <- function(data = get_param("FRED_DATA_FILE"), retain_es_as_character = TRUE, verbose = TRUE) {
+read_fred <- function(data = get_param("FRED_DATA_FILE"), retain_es_as_character = TRUE, verbose = FALSE) {
 
   if (get_param("FRED_OFFLINE")) return(return_inbuilt("data"))
 
@@ -288,7 +288,7 @@ update_offline_data <- function(data_file = get_param("FRED_DATA_FILE"), items =
       } else if (item == "data_changelog") {
         data <- get_dataset_changelog()
       } else if (item == "citation") {
-        data <- create_citation(data_file)
+        data <- create_citation()
       }
       attr(data, "last_updated") <- Sys.time()
       file_path <- system.file("extdata", "snapshot", paste0(item, ".RDS"), package = "FReD")

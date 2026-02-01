@@ -59,15 +59,15 @@ dummy_function_calls <- function() {
   }
 }
 
-#' Create FReD dataset citation
+#' Get FReD dataset citation
 #'
-#' Pulls current contributor list and dynamicalky creates a *markdown-formatted* citation for the FReD dataset.
+#' Retrieves the current citation for the FReD dataset from GitHub.
 #'
-#' @param data_file Path to the FReD dataset, defaults to the current FReD dataset on OSF
+#' @param citation_url URL to the citation file on GitHub
 #' @param cache Should the citation be returned from cache, if already requested during this session? Defaults to TRUE.
-#' @return A markdown-formatted citation for the FReD dataset, including the current dataset version.
+#' @return A markdown-formatted citation for the FReD dataset.
 
-create_citation <- function(data_file = get_param("FRED_DATA_FILE"), cache = TRUE) {
+create_citation <- function(citation_url = "https://raw.githubusercontent.com/forrtproject/FReD-data/main/output/citation.txt", cache = TRUE) {
   if (get_param("FRED_OFFLINE")) {
     return(return_inbuilt("citation"))
   }
@@ -77,19 +77,21 @@ create_citation <- function(data_file = get_param("FRED_DATA_FILE"), cache = TRU
       if (cache && exists("citation", .cache, inherits = FALSE)) {
         return(.cache$citation)
       }
-      contributors <- safe_read_xl(data_file, url = get_param("FRED_DATA_URL"), sheet = "Contributors FReD")
-      contributors <- contributors[contributors$Added.to.FReD.website.as.contributor, ]
-      contributors$first <- substr(contributors$First.name, 1, 1)
-      contributors$middle <- ifelse(!is.na(contributors$Middle.name), paste(" ", substr(contributors$Middle.name, 1, 1), ".", sep = ""), "")
-      contributors$apa <- paste0(
-        contributors$Surname, ", ",
-        contributors$first, ".",
-        contributors$middle
-      )
-      c_names <- paste(contributors$apa, collapse = ", ")
 
-      version <- get_dataset_changelog() %>% stringr::str_extract("(?<=\\*\\*Version:\\*\\* )\\d+\\.\\d+\\.\\d+")
-      cit <- glue::glue("{c_names} (2024). _FReD: FORRT Replication Database, version {version}._ [https://dx.doi.org/10.17605/OSF.IO/9r62x] _*shared first authorship_")
+      temp <- tempfile(fileext = ".txt")
+      download.file(citation_url, temp, quiet = TRUE)
+
+      # Validate download succeeded
+      if (!file.exists(temp) || file.size(temp) == 0) {
+        stop("Failed to download citation file")
+      }
+
+      cit <- readLines(temp, warn = FALSE) %>% paste(collapse = "\n")
+
+      # Validate citation content is not empty
+      if (nchar(trimws(cit)) == 0) {
+        stop("Citation file is empty")
+      }
 
       .cache$citation <- cit
 
@@ -138,7 +140,7 @@ get_dataset_changelog <- function(changelog_file = "https://osf.io/fj3xc/downloa
 #' @return A data frame with the processed FReD dataset
 #' @export
 
-load_fred_data <- function(data = get_param("FRED_DATA_FILE"), verbose = TRUE) {
+load_fred_data <- function(data = get_param("FRED_DATA_FILE"), verbose = FALSE) {
 
   read_fred(data, verbose = verbose) %>%
     clean_variables() %>%

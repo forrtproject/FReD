@@ -9,7 +9,39 @@ server <- function(input, output, session) {
     }
   })
 
+  # Reactive data source - allows refreshing
+  data_source <- reactiveValues(
+    df = df,
+    df_display = df_display
+  )
 
+  # Refresh data when button is clicked
+
+  observeEvent(input$refresh_data, {
+    showNotification("Refreshing data from source...", type = "message", duration = 2)
+    tryCatch({
+      # Force fresh download by temporarily disabling offline mode
+      was_offline <- get_param("FRED_OFFLINE")
+      if (was_offline) use_FReD_offline(FALSE)
+
+      # Delete cached data file to force fresh download from OSF
+      cached_file <- get_param("FRED_DATA_FILE")
+      if (file.exists(cached_file)) {
+        file.remove(cached_file)
+      }
+
+      new_data <- load_app_data()
+      data_source$df <- new_data$df
+      data_source$df_display <- new_data$df_display
+
+      if (was_offline) use_FReD_offline(TRUE)
+
+      showNotification(paste("Data refreshed successfully!", nrow(new_data$df), "findings loaded."),
+                       type = "message", duration = 5)
+    }, error = function(e) {
+      showNotification(paste("Error refreshing data:", e$message), type = "error", duration = 5)
+    })
+  })
 
   # Disclaimer --------------------------------------------------------------
 
@@ -29,7 +61,7 @@ server <- function(input, output, session) {
 
   # Update df_temp based on filters
   observe({
-    df_temp <- df[rev(row.names(df)), ]
+    df_temp <- data_source$df[rev(row.names(data_source$df)), ]
 
     # source
     if (input$source == "All studies") {
@@ -410,7 +442,7 @@ server <- function(input, output, session) {
 
 
   output$dataset <- DT::renderDT(server = FALSE,
-                                 DT::datatable(df_display,
+                                 DT::datatable(data_source$df_display,
     rownames = FALSE,
     # extensions = 'Buttons',
     options = list(scrollX=TRUE, lengthMenu = c(5, 10, 15),
@@ -660,14 +692,17 @@ server <- function(input, output, session) {
     entries <- unlist(base::strsplit(entries, split = "\n")) # |-
     dois <- tolower(stringr::str_extract(entries, "10.\\d{4,9}/[-._;()/:a-z0-9A-Z]+"))
 
+    # Use local copy to avoid modifying reactive data
+    df_local <- data_source$df
+
     # combine coded and uncoded studies
-    df[is.na(df$result), "result"] <- "Not coded yet"
+    df_local[is.na(df_local$result), "result"] <- "Not coded yet"
 
     # Check which entries  exist in the df
-    intersection <- dois[dois %in% df$doi_o]
+    intersection <- dois[dois %in% df_local$doi_o]
 
     # df subset
-    df_temp <- df[(tolower(df$doi_o) %in% dois), ]
+    df_temp <- df_local[(tolower(df_local$doi_o) %in% dois), ]
     df_temp <- df_temp[!is.na(df_temp$doi_o), ]
 
     bardata <- as.data.frame(base::table(df_temp$result, useNA = "always") / nrow(df_temp))
@@ -698,14 +733,17 @@ server <- function(input, output, session) {
     entries <- unlist(base::strsplit(entries, split = "\n")) # |-
     dois <- tolower(stringr::str_extract(entries, "10.\\d{4,9}/[-._;()/:a-z0-9A-Z]+"))
 
+    # Use local copy to avoid modifying reactive data
+    df_local <- data_source$df
+
     # combine coded and uncoded studies
-    df[is.na(df$result), "result"] <- "Not coded yet"
+    df_local[is.na(df_local$result), "result"] <- "Not coded yet"
 
     # Check which entries  exist in the df
-    intersection <- dois[dois %in% df$doi_o]
+    intersection <- dois[dois %in% df_local$doi_o]
 
     # df subset
-    df_temp <- df[(tolower(df$doi_o) %in% dois), ]
+    df_temp <- df_local[(tolower(df_local$doi_o) %in% dois), ]
     df_temp <- df_temp[!is.na(df_temp$doi_o), ]
 
     df_temp$original <- df_temp$ref_o # paste(df_temp$ref_o, df_temp$doi_o, sep = " ") # ADD DOIs if they are not already part of the reference
@@ -884,7 +922,7 @@ server <- function(input, output, session) {
 
   output$checker_bar <- plotly::renderPlotly({
     # this plot is based on the filtered entries from the checkertable
-    df_temp <- df
+    df_temp <- data_source$df
     df_temp <- df_temp[rev(row.names(df_temp)), ]
 
     # exclude non-validated entries
@@ -929,7 +967,7 @@ server <- function(input, output, session) {
 
   output$flexiblecheckertable <- DT::renderDT({
     # this plot is based on the filtered entries from the checkertable
-    df_temp <- df
+    df_temp <- data_source$df
     df_temp <- df_temp[rev(row.names(df_temp)), ]
 
     # exclude non-validated entries

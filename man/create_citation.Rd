@@ -2,18 +2,22 @@
 % Please edit documentation in R/fred.R
 \name{create_citation}
 \alias{create_citation}
-\title{Create FReD dataset citation}
+\title{Get FReD dataset citation}
 \usage{
-create_citation(data_file = get_param("FRED_DATA_FILE"), cache = TRUE)
+create_citation(
+  citation_url =
+    "https://raw.githubusercontent.com/forrtproject/FReD-data/main/output/citation.txt",
+  cache = TRUE
+)
 }
 \arguments{
-\item{data_file}{Path to the FReD dataset, defaults to the current FReD dataset on OSF}
+\item{citation_url}{URL to the citation file on GitHub}
 
 \item{cache}{Should the citation be returned from cache, if already requested during this session? Defaults to TRUE.}
 }
 \value{
-A markdown-formatted citation for the FReD dataset, including the current dataset version.
+A markdown-formatted citation for the FReD dataset.
 }
 \description{
-Pulls current contributor list and dynamicalky creates a \emph{markdown-formatted} citation for the FReD dataset.
+Retrieves the current citation for the FReD dataset from GitHub.
 }

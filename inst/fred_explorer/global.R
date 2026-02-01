@@ -12,12 +12,19 @@ if (!exists("create_citation")) {
 
 if (!exists("create_citation")) stop("Failed to attach FReD namespace.")
 
-df <- load_fred_data()
+# Function to load and prepare data - can be called again to refresh
+load_app_data <- function() {
+  df <- load_fred_data()
+  df_display <- df[, c("description", "es_o", "es_r", "n_o", "n_r", "osf_link", "contributors", "result", "result2", "ref_o", "ref_r")]
+  df_display$es_o <- round(df_display$es_o, 3)
+  df_display$es_r <- round(df_display$es_r, 3)
+  list(df = df, df_display = df_display)
+}
 
-df_display <- df[, c("description", "es_o", "es_r", "n_o", "n_r", "osf_link", "contributors", "result", "result2", "ref_o", "ref_r")]
-df_display$es_o <- round(df_display$es_o, 3)
-df_display$es_r <- round(df_display$es_r, 3)
-
+# Initial data load
+app_data <- load_app_data()
+df <- app_data$df
+df_display <- app_data$df_display
 
 dataset_variables <- load_variable_descriptions()
 

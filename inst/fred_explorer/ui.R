@@ -84,7 +84,10 @@ sidebar_contents <- sidebar(
                selected = "significance_r"),
   div(
     HTML("<strong>NB:</strong> The success criteria (e.g., <em>p</em>-values, CIs) are calculated from raw effect and sample sizes. These may differ from original reports that used adjusted models.")
-  )
+  ),
+  hr(),
+  actionButton("refresh_data", "Load latest data", icon = icon("refresh"),
+               style = "width: 100%;")
 )
 
 # Define content for each panel
