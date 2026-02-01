@@ -106,7 +106,7 @@ read_fred <- function(data = get_param("FRED_DATA_FILE"), retain_es_as_character
       }
     }
 
-    numeric_variables <- c("n_o", "n_r", "es_value_o", "es_value_r")
+    numeric_variables <- c("n_o", "n_r", "es_value_o", "es_value_r", "pval_value_o", "pval_value_r")
 
     # Only coerce variables that exist in the dataset
     numeric_variables <- intersect(numeric_variables, names(fred_data))
