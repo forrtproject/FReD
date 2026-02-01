@@ -288,7 +288,7 @@ update_offline_data <- function(data_file = get_param("FRED_DATA_FILE"), items =
       } else if (item == "data_changelog") {
         data <- get_dataset_changelog()
       } else if (item == "citation") {
-        data <- create_citation(data_file)
+        data <- create_citation()
       }
       attr(data, "last_updated") <- Sys.time()
       file_path <- system.file("extdata", "snapshot", paste0(item, ".RDS"), package = "FReD")

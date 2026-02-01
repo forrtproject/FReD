@@ -80,7 +80,18 @@ create_citation <- function(citation_url = "https://raw.githubusercontent.com/fo
 
       temp <- tempfile(fileext = ".txt")
       download.file(citation_url, temp, quiet = TRUE)
+
+      # Validate download succeeded
+      if (!file.exists(temp) || file.size(temp) == 0) {
+        stop("Failed to download citation file")
+      }
+
       cit <- readLines(temp, warn = FALSE) %>% paste(collapse = "\n")
+
+      # Validate citation content is not empty
+      if (nchar(trimws(cit)) == 0) {
+        stop("Citation file is empty")
+      }
 
       .cache$citation <- cit
 
