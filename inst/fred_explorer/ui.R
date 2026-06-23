@@ -71,7 +71,7 @@ sidebar_contents <- sidebar(
                    icon(c("info-circle"))
                  ),
                  "Check our ",
-                 a("vignette", href = "https://forrt.org/FReD/articles/success_criteria.html", target = "_blank"),
+                 a("vignette", href = "https://forrt.org/fred/articles/success_criteria.html", target = "_blank"),
                  "for details on the different success criteria."
                ),
                choices = c("Significance of Replication" = "significance_r",
