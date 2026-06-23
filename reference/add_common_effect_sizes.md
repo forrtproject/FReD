@@ -8,9 +8,9 @@ adds them to the dataset.
 ``` r
 add_common_effect_sizes(
   fred_data,
-  es_value_columns = c("es_orig_value", "es_rep_value"),
-  es_type_columns = c("es_orig_estype", "es_rep_estype"),
-  es_common_names = c("es_original", "es_replication"),
+  es_value_columns = c("es_value_o", "es_value_r"),
+  es_type_columns = c("es_type_o", "es_type_r"),
+  es_common_names = c("es_o", "es_r"),
   coalesce_values = TRUE
 )
 ```

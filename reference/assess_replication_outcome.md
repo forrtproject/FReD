@@ -2,7 +2,7 @@
 
 This function evaluates the outcomes of replication studies against the
 original studies using various statistical criteria (see below, and
-[`vignette("success_criteria")`](http://forrt.org/FReD/articles/success_criteria.md)
+[`vignette("success_criteria")`](https://forrt.org/fred/articles/success_criteria.md)
 for more details).
 
 ## Usage

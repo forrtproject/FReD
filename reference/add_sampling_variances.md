@@ -8,9 +8,9 @@ dataset, using metafor::escalc
 ``` r
 add_sampling_variances(
   fred_data,
-  es_value_columns = c("es_original", "es_replication"),
-  N_columns = c("n_original", "n_replication"),
-  vi_columns = c("vi_original", "vi_replication")
+  es_value_columns = c("es_o", "es_r"),
+  N_columns = c("n_o", "n_r"),
+  vi_columns = c("vi_o", "vi_r")
 )
 ```
 

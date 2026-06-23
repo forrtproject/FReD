@@ -14,13 +14,13 @@
 ## Citation
 
 Röseler L, Wallrich L, Hartmann H, Azevedo F (2026). *FReD: Interfaces
-to the FORRT Replication Database*. R package version 0.0.0.9002,
+to the FORRT Replication Database*. R package version 0.2.0,
 <http://forrt.org/FReD/>.
 
     @Manual{,
       title = {FReD: Interfaces to the FORRT Replication Database},
       author = {Lukas Röseler and Lukas Wallrich and Helena Hartmann and Flavio Azevedo},
       year = {2026},
-      note = {R package version 0.0.0.9002},
+      note = {R package version 0.2.0},
       url = {http://forrt.org/FReD/},
     }

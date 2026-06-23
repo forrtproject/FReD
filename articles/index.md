@@ -3,4 +3,4 @@
 ### All vignettes
 
 - [Assessing replication
-  success](http://forrt.org/FReD/articles/success_criteria.md):
+  success](https://forrt.org/fred/articles/success_criteria.md):

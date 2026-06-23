@@ -9,7 +9,7 @@ different sheets into one data frame.
 read_fred(
   data = get_param("FRED_DATA_FILE"),
   retain_es_as_character = TRUE,
-  verbose = TRUE
+  verbose = FALSE
 )
 ```
 
@@ -19,7 +19,7 @@ read_fred(
 
   Path to the FReD dataset (defaults to current FReD data on OSF),
   unless the package is in offline mode
-  ([`use_FReD_offline()`](http://forrt.org/FReD/reference/use_FReD_offline.md))
+  ([`use_FReD_offline()`](https://forrt.org/fred/reference/use_FReD_offline.md))
 
 - retain_es_as_character:
 
@@ -29,8 +29,8 @@ read_fred(
 - verbose:
 
   Should detailed messages be printed that highlight data conversion
-  issues? Defaults to TRUE. FALSE is quiet mode, and NULL prints a
-  summary of problems.
+  issues? Defaults to FALSE (quiet mode). TRUE prints detailed warnings,
+  and NULL prints a summary of problems.
 
 ## Value
 

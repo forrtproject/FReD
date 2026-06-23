@@ -1,19 +1,22 @@
-# Create FReD dataset citation
+# Get FReD dataset citation
 
-Pulls current contributor list and dynamicalky creates a
-*markdown-formatted* citation for the FReD dataset.
+Retrieves the current citation for the FReD dataset from GitHub.
 
 ## Usage
 
 ``` r
-create_citation(data_file = get_param("FRED_DATA_FILE"), cache = TRUE)
+create_citation(
+  citation_url =
+    "https://raw.githubusercontent.com/forrtproject/FReD-data/main/output/citation.txt",
+  cache = TRUE
+)
 ```
 
 ## Arguments
 
-- data_file:
+- citation_url:
 
-  Path to the FReD dataset, defaults to the current FReD dataset on OSF
+  URL to the citation file on GitHub
 
 - cache:
 
@@ -22,5 +25,4 @@ create_citation(data_file = get_param("FRED_DATA_FILE"), cache = TRUE)
 
 ## Value
 
-A markdown-formatted citation for the FReD dataset, including the
-current dataset version.
+A markdown-formatted citation for the FReD dataset.

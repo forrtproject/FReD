@@ -1,6 +1,7 @@
 # Assessing replication success
 
 ``` r
+
 library(FReD)
 library(dplyr)
 library(ggplot2)
@@ -11,7 +12,7 @@ library(ggplot2)
 Whether a replication is successful can be assessed in many different
 ways that answer different questions. Many criteria have been proposed,
 and some of them have been implemented in
-[`assess_replication_outcome()`](http://forrt.org/FReD/reference/assess_replication_outcome.md) -
+[`assess_replication_outcome()`](https://forrt.org/fred/reference/assess_replication_outcome.md) -
 we will briefly introduce them here, and then compare their results.
 
 ### Repeated significance
@@ -34,9 +35,10 @@ However, there are some limitations:
   effect.
 
 To use this criterion, set `criterion = "significance_r"` in
-[`assess_replication_outcome()`](http://forrt.org/FReD/reference/assess_replication_outcome.md).
+[`assess_replication_outcome()`](https://forrt.org/fred/reference/assess_replication_outcome.md).
 
 ``` r
+
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .1, n_r = 1000,
                            criterion = "significance_r")
 #>   outcome                  outcome_detailed outcome_report
@@ -59,9 +61,10 @@ sizes are likely inflated, so that more trust should be placed in the
 replication study.
 
 To use this criterion, set `criterion = "significance_agg"` in
-[`assess_replication_outcome()`](http://forrt.org/FReD/reference/assess_replication_outcome.md):
+[`assess_replication_outcome()`](https://forrt.org/fred/reference/assess_replication_outcome.md):
 
 ``` r
+
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .1, n_r = 50,
                            criterion = "significance_agg")
 #>   outcome                                             outcome_detailed
@@ -88,6 +91,7 @@ if their point estimate is close to the original effect size.
 To use this criterion, set `criterion = "consistency_ci"`.
 
 ``` r
+
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .3, n_r = 50,
                            criterion = "consistency_ci")
 #>   outcome                                outcome_detailed outcome_report
@@ -114,6 +118,7 @@ very difficult to reject them through replications.
 To use this criterion, set `criterion = "consistency_pi"`
 
 ``` r
+
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .3, n_r = 500,
                            criterion = "consistency_pi")
 #>   outcome                                          outcome_detailed
@@ -140,6 +145,7 @@ evidence does not support the existence of an effect.
 To use this criterion, set `criterion = "homogeneity"`:
 
 ``` r
+
 assess_replication_outcome(es_o = .2, n_o = 100, es_r = 0, n_r = 500,
                            criterion = "homogeneity")
 #>   outcome              outcome_detailed outcome_report
@@ -160,6 +166,7 @@ size in small studies.
 To use this criterion, set `criterion = "homogeneity_significance"`:
 
 ``` r
+
 assess_replication_outcome(es_o = .2, n_o = 100, es_r = 0, n_r = 500,
                            criterion = "homogeneity_significance")
 #>   outcome                                 outcome_detailed
@@ -183,6 +190,7 @@ than the quality of evidence.
 To use this criterion, set `criterion = "small_telescopes"`:
 
 ``` r
+
 assess_replication_outcome(es_o = .5, n_o = 50, es_r = .2, n_r = 100,
                            criterion = "small_telescopes")
 #>   outcome                                             outcome_detailed
@@ -205,24 +213,25 @@ on the FReD dataset. For this, we ignore studies that have not been
 coded.
 
 ``` r
-df <- load_fred_data() %>% 
-  filter(!is.na(es_replication) & !is.na(es_original)) 
+
+df <- load_fred_data() %>%
+  filter(!is.na(es_r) & !is.na(es_o))
 
 criteria <- tribble(
-  ~criterion,                  ~name,                             
-   "significance_r",            "Significance\n(replication)",               
-   "significance_agg",          "Significance\n(aggregated)",             
-   "consistency_ci",            "Consistency\n(confidence interval)", 
-   "consistency_pi",            "Consistency\n(prediction interval)",   
-   "homogeneity",               "Homogeneity",                    
+  ~criterion,                  ~name,
+   "significance_r",            "Significance\n(replication)",
+   "significance_agg",          "Significance\n(aggregated)",
+   "consistency_ci",            "Consistency\n(confidence interval)",
+   "consistency_pi",            "Consistency\n(prediction interval)",
+   "homogeneity",               "Homogeneity",
    "homogeneity_significance",  "Homogeneity +\nSignificance",
    "small_telescopes",          "Small Telescopes"
 )
 
 results <- lapply(criteria$criterion, function(criterion) {
-  df %>% 
-    mutate(assess_replication_outcome(es_original, n_original, es_replication, n_replication, criterion = criterion)) %>% 
-    count(outcome, outcome_detailed) %>% 
+  df %>%
+    mutate(assess_replication_outcome(es_o, n_o, es_r, n_r, criterion = criterion)) %>%
+    count(outcome, outcome_detailed) %>%
     mutate(criterion = criterion)
 })
 

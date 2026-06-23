@@ -26,7 +26,7 @@ following environment variables can be set (before loading the package):
 
 - `FRED_OFFLINE`: Should FReD work offline (TRUE) or online (FALSE). If
   TRUE, FReD will not download the latest data every time it is loaded.
-  Defaults to FALSE.
+  Defaults to TRUE.
 
 - `FRED_SUPPRESS_STARTUP_MENU`: Should the interactive menu checking for
   data updates be suppressed (TRUE) or shown (FALSE). If TRUE, all
